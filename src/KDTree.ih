@@ -1,0 +1,126 @@
+/********** KDPoint Functions Implementation *********/
+template<class T, std::size_t N>
+double distance(const std::array<T, N> &a, const std::array<T, N> &b)
+{
+  T d(0.0);
+  for(std::size_t dim = 0; dim < N; ++dim)
+    d += std::pow(a[dim] - b[dim], 2.0);
+
+  return std::sqrt(d);
+}
+
+template <typename T, std::size_t N>
+std::ostream &operator<<(std::ostream &out, const KDPoint<T, N>& p)
+{
+  out << "KDPoint[ ";
+  for(std::size_t dim = 0; dim < N - 1; ++dim)
+    out << p.point[dim] << ", ";
+  out << p.point[N - 1] << " ]";
+
+  return out;
+}
+
+/********** KDNode Functions Implementation *********/
+template <typename T, std::size_t N>
+std::ostream &operator<<(std::ostream &out, const KDNode<T, N>& n)
+{
+  if(!n.isLeaf())
+  {
+    out << "Simple Node. SplitVal=" << n.value->point[n.depth % N] << " " << *(n.value);
+  }
+
+  return out;
+}
+
+/********** KDTree Functions Implementation *********/
+template <typename T, std::size_t N>
+KDTree<T,N>::KDTree(KDPointArray &arr)
+{
+  KDPointArray internalArr;
+  for(auto const& n : arr)
+    internalArr.push_back(n);
+
+  root = KDTree::makeTree(internalArr.begin(), internalArr.end());
+}
+
+template <typename T, std::size_t N>
+typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const typename KDPointArray::iterator &begin, 
+      const typename KDPointArray::iterator &end,
+      const std::size_t level)
+{
+  if(std::distance(begin, end) > 1)
+    std::sort(begin, end, [&level](const KDPointSPtr &a, const KDPointSPtr &b) -> bool
+    {
+      return a->point[level % N] < b->point[level % N];
+    });
+
+  auto middle = begin + std::distance(begin, end) / 2; 
+
+  KDNodeUPtr left;
+  if(std::distance(begin, middle) > 0)
+    left = makeTree(begin, middle, level + 1);
+  else left = nullptr;
+
+  KDNodeUPtr right;
+  if(std::distance(middle + 1, end) > 0)
+    right = makeTree(middle + 1, end, level + 1);
+  else right = nullptr;
+
+  return std::make_unique<const KDNode<T,N>>(*middle, left, right, level);
+}
+
+template <typename T, std::size_t N>
+const KDPoint<T,N> KDTree<T,N>::nearest(const std::array<T, N> &point) const
+{
+  KDPoint<T, N> closest({0.0, 0.0});
+  double minDist = std::numeric_limits<T>::max();
+  nearest(root, point, closest, minDist);
+  return closest;
+}
+
+template <typename T, std::size_t N>
+void KDTree<T,N>::nearest(const KDNodeUPtr &node,
+    const std::array<T, N> &point,
+    KDPoint<T, N> &closest,
+    T &minDist) const
+{
+  if(node == nullptr || node->isLeaf())
+    return;
+
+  const T dist = distance(point, node->value->point); 
+  if(dist < minDist)
+  {
+    minDist = dist;
+    closest = *(node->value);
+  }
+
+  const size_t dim = node->depth % N;
+  if(point[dim] <= node->value->point[dim])
+  {
+    nearest(node->left , point, closest, minDist);
+    if(point[dim] + minDist >= node->value->point[dim]) 
+      nearest(node->right, point, closest, minDist);
+  }
+  else
+  {
+    nearest(node->right, point, closest, minDist);
+    if(point[dim] - minDist <= node->value->point[dim]) 
+      nearest(node->left , point, closest, minDist);
+  }
+}
+
+template <typename T, std::size_t N>
+void KDTree<T,N>::displayTree(const KDNode<T,N> *ptr)
+{
+  if(ptr == nullptr) return;
+
+  for(std::size_t i = 0; i < ptr->depth; ++i) std::cout << " ";
+  std::cout << *ptr << std::endl;
+
+  for(std::size_t i = 0; i < ptr->depth; ++i) std::cout << " ";
+  std::cout << "LEFT" << std::endl;  displayTree(ptr->left);
+  std::cout << "-----\n";
+  for(std::size_t i = 0; i < ptr->depth; ++i) std::cout << " ";
+  std::cout << "RIGHT" << std::endl; displayTree(ptr->right);
+}
+

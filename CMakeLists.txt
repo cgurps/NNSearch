@@ -1,0 +1,10 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.9)
+
+PROJECT(ClosestPoint)
+
+SET(CMAKE_CXX_STANDARD 17)
+
+ADD_EXECUTABLE(
+    closestPoint
+    src/main.cpp
+)
