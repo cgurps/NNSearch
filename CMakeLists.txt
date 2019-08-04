@@ -8,3 +8,6 @@ ADD_EXECUTABLE(
     closestPoint
     src/main.cpp
 )
+
+ENABLE_TESTING()
+ADD_SUBDIRECTORY(tests)

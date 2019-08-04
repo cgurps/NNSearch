@@ -12,6 +12,8 @@ template <class T, std::size_t N>
 class KDPoint
 {
   public:
+    KDPoint<T,N>() {}
+
     KDPoint<T,N>(std::array<T,N> &&t)
       : point(std::move(t))
     {}
@@ -31,7 +33,7 @@ class KDPoint
 };
 
 template<class T, std::size_t N>
-double distance(const std::array<T, N> &a, const std::array<T, N> &b);
+T distance(const std::array<T, N> &a, const std::array<T, N> &b);
 
 template <typename T, std::size_t N>
 std::ostream &operator<<(std::ostream &out, const KDPoint<T, N>& p);

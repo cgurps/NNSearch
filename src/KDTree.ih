@@ -1,6 +1,6 @@
 /********** KDPoint Functions Implementation *********/
 template<class T, std::size_t N>
-double distance(const std::array<T, N> &a, const std::array<T, N> &b)
+T distance(const std::array<T, N> &a, const std::array<T, N> &b)
 {
   T d(0.0);
   for(std::size_t dim = 0; dim < N; ++dim)
@@ -73,7 +73,7 @@ template <typename T, std::size_t N>
 const KDPoint<T,N> KDTree<T,N>::nearest(const std::array<T, N> &point) const
 {
   KDPoint<T, N> closest({0.0, 0.0});
-  double minDist = std::numeric_limits<T>::max();
+  T minDist = std::numeric_limits<T>::max();
   nearest(root, point, closest, minDist);
   return closest;
 }
