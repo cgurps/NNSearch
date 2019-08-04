@@ -1,5 +1,6 @@
 #include <random>
 #include "../src/KDTree.h"
+#include "../src/SplitFunctions.h"
 
 #define ASSERT_THROW( condition )                                   \
 {                                                                   \
@@ -17,7 +18,7 @@
 template <typename T, std::size_t N>
 void test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt19937 &rng)
 {
-  typedef KDPoint<T, N> Point;
+  typedef KDPoint<T,N> Point;
 
   std::uniform_real_distribution<T> dist(0.0, 100.0);
 
@@ -30,10 +31,10 @@ void test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt199
     arr.push_back(std::make_shared<const Point>(p));
    }
 
-  KDTree<T, N> tree(arr);
+  KDTree<T,N> tree(arr, median<T,N>);
   for(std::size_t i = 0; i < nbTestPoints; ++i)
   {
-    std::array<T, N> p;
+    std::array<T,N> p;
     for(std::size_t dim = 0; dim < N; ++dim)
       p[dim] = dist(rng); 
 

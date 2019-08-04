@@ -1,4 +1,5 @@
 #include "KDTree.h"
+#include "SplitFunctions.h"
 
 #include <random>
 #include <chrono>
@@ -7,7 +8,7 @@ int main(int argc, char** argv)
 {
   typedef KDPoint<double, 3> Point;
 
-  int nbPoints = 10000, nbTestPoints = 40000;
+  int nbPoints = 1000000, nbTestPoints = 40000;
 
   std::random_device dev;
   std::mt19937 rng(dev());
@@ -21,7 +22,7 @@ int main(int argc, char** argv)
    }
 
   auto start = std::chrono::high_resolution_clock::now();
-  KDTree<double, 3> tree(arr);
+  KDTree<double, 3> tree(arr, median<double,3>);
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> tTime = finish - start;
 
@@ -36,19 +37,6 @@ int main(int argc, char** argv)
     Point n = tree.nearest(p);
     auto finish = std::chrono::high_resolution_clock::now();
     tTime += finish - start;
-
-    Point nn({0.0, 0.0});
-    double minDist = std::numeric_limits<double>::max();
-    for(int i = 0; i < nbPoints; ++i)
-    {
-      if(distance(p, arr[i]->point) < minDist)
-      {
-        minDist = distance(p, arr[i]->point);
-        nn = *(arr[i]);
-      }
-    }
-
-    if(nn.point != n.point) std::cout << Point(p) << "\n\t" << n << "\n\t" << nn << std::endl;
   }
 
   std::cout << "Query time: " << tTime.count() << " s\n";

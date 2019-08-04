@@ -8,40 +8,40 @@
 #include <iostream>
 #include <cmath>
 #include <type_traits>
+#include <functional>
 
 template <class T, std::size_t N>
-class KDPoint
+struct KDPoint
 {
-  public:
-    KDPoint<T,N>() 
-    {
-      static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-      static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-    }
+  KDPoint<T,N>() 
+  {
+    static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+    static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+  }
 
-    KDPoint<T,N>(std::array<T,N> &&t)
-      : point(std::move(t))
-    {
-      static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-      static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-    }
+  KDPoint<T,N>(std::array<T,N> &&t)
+    : point(std::move(t))
+  {
+    static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+    static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+  }
 
-    KDPoint<T,N>(std::array<T,N> &t)
-      : point(std::move(t))
-    {
-      static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-      static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-    }
+  KDPoint<T,N>(std::array<T,N> &t)
+    : point(std::move(t))
+  {
+    static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+    static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+  }
 
-    ~KDPoint<T,N>() = default;
+  ~KDPoint<T,N>() = default;
 
-    T operator[](const std::size_t &dim)
-    {
-      assert(dim >= 0);
-      return point[dim];
-    }
+  T operator[](const std::size_t &dim)
+  {
+    assert(dim >= 0);
+    return point[dim];
+  }
 
-    std::array<T, N> point;
+  std::array<T, N> point;
 };
 
 template<class T, std::size_t N>
@@ -51,31 +51,19 @@ template <typename T, std::size_t N>
 std::ostream &operator<<(std::ostream &out, const KDPoint<T, N>& p);
 
 template <class T, std::size_t N>
-class KDNode
+struct KDNode
 {
   using KDNodeUPtr = std::unique_ptr<const KDNode<T,N>>;
   using KDPointSPtr = std::shared_ptr<const KDPoint<T,N>>;
 
   public:
-    KDNode(KDPointSPtr p, 
-           KDNodeUPtr &lhs, 
-           KDNodeUPtr &rhs, 
-           const std::size_t &depth)
-      : value(p),
-        left(std::move(lhs)), 
-        right(std::move(rhs)), 
-        depth(depth)
-    {
-      assert(depth >= 0);
-    }
+    KDNode(KDPointSPtr p, KDNodeUPtr &lhs, KDNodeUPtr &rhs) 
+      : value(p), left(std::move(lhs)), right(std::move(rhs)) 
+    {}
 
-    KDNode(KDPointSPtr p, 
-           const std::size_t &depth)
-      : value(p),
-        depth(depth)
-    {
-      assert(depth >= 0);
-    }
+    KDNode(KDPointSPtr p) 
+      : value(p)
+    {}
 
     KDNode() = delete;
     KDNode(const KDNode &) = delete;
@@ -83,14 +71,10 @@ class KDNode
 
     ~KDNode() = default;
 
-    bool isLeaf() const
-    {
-      return value == nullptr;
-    }
+    bool isLeaf() const { return value == nullptr; }
 
     const KDNodeUPtr left, right;
     const KDPointSPtr value;
-    const std::size_t depth;
 };
 
 template <typename T, std::size_t N>
@@ -99,40 +83,35 @@ std::ostream &operator<<(std::ostream &out, const KDNode<T, N>& n);
 template <class T, std::size_t N>
 class KDTree
 {
-  using KDNodeUPtr = std::unique_ptr<const KDNode<T,N>>;
-  using KDPointSPtr = std::shared_ptr<const KDPoint<T,N>>;
-  using KDPointArray = typename std::vector<KDPointSPtr>;
-
   public:
-    
+    using KDNodeUPtr = std::unique_ptr<const KDNode<T,N>>;
+    using KDPointSPtr = std::shared_ptr<const KDPoint<T,N>>;
+    using KDPointArray = typename std::vector<KDPointSPtr>;
+    using ArrayIter = typename KDPointArray::iterator;
+    using SplitFunction = std::function<ArrayIter(const ArrayIter&, const ArrayIter&, const std::size_t)>;
+
     KDTree() = delete;
     KDTree(const KDTree &) = delete;
     KDTree &operator = (const KDTree &) = delete;
     ~KDTree() = default;
 
-    KDTree(KDPointArray &arr);
-
-    void display() 
-    { 
-      assert(root != nullptr);
-      displayTree(root); 
-    }
+    KDTree(KDPointArray &arr, const SplitFunction &splitFun);
 
     const KDPoint<T, N> nearest(const std::array<T, N> &point) const;
 
   private:
-    KDNodeUPtr makeTree(const typename KDPointArray::iterator &begin, 
-        const typename KDPointArray::iterator &end,
-        const std::size_t level = 0); 
+    KDNodeUPtr root;
+    const SplitFunction splitFun;
+
+    KDNodeUPtr makeTree(const ArrayIter &begin, 
+        const ArrayIter &end,
+        const std::size_t depth = 0); 
 
     void nearest(const KDNodeUPtr &node,
         const std::array<T, N> &point,
         KDPoint<T, N> &closest,
-        T &minDist) const;
-
-    void displayTree(const KDNode<T,N> *ptr); 
-
-    KDNodeUPtr root;
+        T &minDist,
+        const std::size_t depth = 0) const;
 };
 
 #include "KDTree.ih"

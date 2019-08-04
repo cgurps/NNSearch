@@ -38,7 +38,8 @@ std::ostream &operator<<(std::ostream &out, const KDNode<T, N>& n)
 
 /********** KDTree Functions Implementation *********/
 template <typename T, std::size_t N>
-KDTree<T,N>::KDTree(KDPointArray &arr)
+KDTree<T,N>::KDTree(KDPointArray &arr, const SplitFunction &splitFun)
+  :splitFun(splitFun)
 {
   assert(arr.size() >= 2);
 
@@ -50,31 +51,25 @@ KDTree<T,N>::KDTree(KDPointArray &arr)
 }
 
 template <typename T, std::size_t N>
-typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const typename KDPointArray::iterator &begin, 
-      const typename KDPointArray::iterator &end,
-      const std::size_t level)
+typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin, 
+      const ArrayIter &end,
+      const std::size_t depth)
 {
-  assert(level >= 0);
+  assert(depth >= 0);
 
-  if(std::distance(begin, end) > 1)
-    std::sort(begin, end, [&level](const KDPointSPtr &a, const KDPointSPtr &b) -> bool
-    {
-      return a->point[level % N] < b->point[level % N];
-    });
-
-  auto middle = begin + std::distance(begin, end) / 2; 
+  const ArrayIter middle = splitFun(begin, end, depth);
 
   KDNodeUPtr left;
   if(std::distance(begin, middle) > 0)
-    left = makeTree(begin, middle, level + 1);
+    left = makeTree(begin, middle, depth + 1);
   else left = nullptr;
 
   KDNodeUPtr right;
   if(std::distance(middle + 1, end) > 0)
-    right = makeTree(middle + 1, end, level + 1);
+    right = makeTree(middle + 1, end, depth + 1);
   else right = nullptr;
 
-  return std::make_unique<const KDNode<T,N>>(*middle, left, right, level);
+  return std::make_unique<const KDNode<T,N>>(*middle, left, right);
 }
 
 template <typename T, std::size_t N>
@@ -90,7 +85,8 @@ template <typename T, std::size_t N>
 void KDTree<T,N>::nearest(const KDNodeUPtr &node,
     const std::array<T, N> &point,
     KDPoint<T, N> &closest,
-    T &minDist) const
+    T &minDist,
+    const std::size_t depth) const
 {
   if(node == nullptr || node->isLeaf())
     return;
@@ -104,33 +100,18 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
     closest = *(node->value);
   }
 
-  const size_t dim = node->depth % N;
+  const size_t dim = depth % N;
   if(point[dim] <= node->value->point[dim])
   {
-    nearest(node->left , point, closest, minDist);
+    nearest(node->left , point, closest, minDist, depth + 1);
     if(point[dim] + minDist >= node->value->point[dim]) 
-      nearest(node->right, point, closest, minDist);
+      nearest(node->right, point, closest, minDist, depth + 1);
   }
   else
   {
-    nearest(node->right, point, closest, minDist);
+    nearest(node->right, point, closest, minDist, depth + 1);
     if(point[dim] - minDist <= node->value->point[dim]) 
-      nearest(node->left , point, closest, minDist);
+      nearest(node->left , point, closest, minDist, depth + 1);
   }
-}
-
-template <typename T, std::size_t N>
-void KDTree<T,N>::displayTree(const KDNode<T,N> *ptr)
-{
-  if(ptr == nullptr) return;
-
-  for(std::size_t i = 0; i < ptr->depth; ++i) std::cout << " ";
-  std::cout << *ptr << std::endl;
-
-  for(std::size_t i = 0; i < ptr->depth; ++i) std::cout << " ";
-  std::cout << "LEFT" << std::endl;  displayTree(ptr->left);
-  std::cout << "-----\n";
-  for(std::size_t i = 0; i < ptr->depth; ++i) std::cout << " ";
-  std::cout << "RIGHT" << std::endl; displayTree(ptr->right);
 }
 
