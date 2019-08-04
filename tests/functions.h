@@ -1,9 +1,9 @@
 #include <random>
 #include "../src/KDTree.h"
 
-#define ASSERT_THROW( condition )                             \
+#define ASSERT_THROW( condition )                                   \
 {                                                                   \
-  if( !( condition ) )                                              \
+  if( condition )                                                   \
   {                                                                 \
     throw std::runtime_error(   std::string( __FILE__ )             \
                               + std::string( ":" )                  \
@@ -50,6 +50,6 @@ void test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt199
       }
     }
 
-    ASSERT_THROW(nn.point == n.point);
+    ASSERT_THROW(distance(nn.point, n.point) > T(1e-10));
   }
 }

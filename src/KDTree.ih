@@ -1,3 +1,5 @@
+#include "assert.h"
+
 /********** KDPoint Functions Implementation *********/
 template<class T, std::size_t N>
 T distance(const std::array<T, N> &a, const std::array<T, N> &b)
@@ -5,6 +7,8 @@ T distance(const std::array<T, N> &a, const std::array<T, N> &b)
   T d(0.0);
   for(std::size_t dim = 0; dim < N; ++dim)
     d += std::pow(a[dim] - b[dim], 2.0);
+
+  assert(d >= T(0));
 
   return std::sqrt(d);
 }
@@ -36,6 +40,8 @@ std::ostream &operator<<(std::ostream &out, const KDNode<T, N>& n)
 template <typename T, std::size_t N>
 KDTree<T,N>::KDTree(KDPointArray &arr)
 {
+  assert(arr.size() >= 2);
+
   KDPointArray internalArr;
   for(auto const& n : arr)
     internalArr.push_back(n);
@@ -48,6 +54,8 @@ typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const typename KDPointArr
       const typename KDPointArray::iterator &end,
       const std::size_t level)
 {
+  assert(level >= 0);
+
   if(std::distance(begin, end) > 1)
     std::sort(begin, end, [&level](const KDPointSPtr &a, const KDPointSPtr &b) -> bool
     {
@@ -86,6 +94,8 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
 {
   if(node == nullptr || node->isLeaf())
     return;
+
+  assert(node->value != nullptr);
 
   const T dist = distance(point, node->value->point); 
   if(dist < minDist)

@@ -7,25 +7,37 @@
 #include <algorithm>
 #include <iostream>
 #include <cmath>
+#include <type_traits>
 
 template <class T, std::size_t N>
 class KDPoint
 {
   public:
-    KDPoint<T,N>() {}
+    KDPoint<T,N>() 
+    {
+      static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+      static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+    }
 
     KDPoint<T,N>(std::array<T,N> &&t)
       : point(std::move(t))
-    {}
+    {
+      static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+      static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+    }
 
     KDPoint<T,N>(std::array<T,N> &t)
       : point(std::move(t))
-    {}
+    {
+      static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+      static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+    }
 
     ~KDPoint<T,N>() = default;
 
     T operator[](const std::size_t &dim)
     {
+      assert(dim >= 0);
       return point[dim];
     }
 
@@ -53,13 +65,17 @@ class KDNode
         left(std::move(lhs)), 
         right(std::move(rhs)), 
         depth(depth)
-    {}
+    {
+      assert(depth >= 0);
+    }
 
     KDNode(KDPointSPtr p, 
            const std::size_t &depth)
       : value(p),
         depth(depth)
-    {}
+    {
+      assert(depth >= 0);
+    }
 
     KDNode() = delete;
     KDNode(const KDNode &) = delete;
@@ -96,7 +112,11 @@ class KDTree
 
     KDTree(KDPointArray &arr);
 
-    void display() { displayTree(root); }
+    void display() 
+    { 
+      assert(root != nullptr);
+      displayTree(root); 
+    }
 
     const KDPoint<T, N> nearest(const std::array<T, N> &point) const;
 
