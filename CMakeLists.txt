@@ -2,11 +2,22 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.9)
 
 PROJECT(ClosestPoint)
 
+FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+
 SET(CMAKE_CXX_STANDARD 17)
 
-ADD_EXECUTABLE(
-    closestPoint
+ADD_EXECUTABLE(closestPoint
     src/main.cpp
+    src/ProgramOptions.cpp
+)
+
+TARGET_LINK_LIBRARIES(closestPoint
+    ${Boost_LIBRARIES}
+    )
+
+ADD_CUSTOM_COMMAND(TARGET closestPoint POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/shapes/* ${CMAKE_BINARY_DIR}/shapes
 )
 
 ENABLE_TESTING()
