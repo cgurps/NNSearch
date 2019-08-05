@@ -13,33 +13,21 @@
 template <class T, std::size_t N>
 struct KDPoint
 {
+  static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
+  static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
+
   KDPoint<T,N>() 
-  {
-    static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-    static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-  }
+  {}
 
   KDPoint<T,N>(std::array<T,N> &&t)
     : point(std::move(t))
-  {
-    static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-    static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-  }
+  {}
 
   KDPoint<T,N>(std::array<T,N> &t)
     : point(std::move(t))
-  {
-    static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-    static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-  }
+  {}
 
   ~KDPoint<T,N>() = default;
-
-  T operator[](const std::size_t &dim)
-  {
-    assert(dim >= 0);
-    return point[dim];
-  }
 
   std::array<T, N> point;
 };
