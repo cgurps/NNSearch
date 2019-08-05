@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
   std::random_device dev;
   std::mt19937 rng(dev());
-  std::uniform_real_distribution<double> dist(0.0, 100.0);
+  std::uniform_real_distribution<double> dist(-100.0, 100.0);
 
   ProgramOptions options = parseOptions(argc, argv);
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
       auto finish = std::chrono::high_resolution_clock::now();
       tTime += finish - start;
 
-      printf("\r%i/%i", i + 1, options.nbTestPoints);
+      printf("\r%lu/%lu", i + 1, options.nbTestPoints);
       fflush(stdout);
     }
 

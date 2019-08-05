@@ -10,7 +10,7 @@ ProgramOptions parseOptions(int argc, char* argv[])
 
   po::options_description poLoader("Program options");
   poLoader.add_options()
-    ("input,i", po::value<std::string>(&options.filename), "input OBJ filepath")
+    ("input,i", po::value<std::string>(&options.filename)->default_value("shapes/bunny.obj"), "input OBJ filepath")
     ("nbTestPoints,n", po::value<std::size_t>(&options.nbTestPoints)->default_value(100), "number of test points")
   ;
 

@@ -1,3 +1,9 @@
+/**
+ * @file KDTree.ih
+ * @author Thomas Caissard (\c thomas.caissard@gmail.com)
+ * @date 2019/08/05
+ */
+
 #include "assert.h"
 
 /********** KDPoint Functions Implementation *********/
@@ -39,20 +45,34 @@ std::ostream &operator<<(std::ostream &out, const KDNode<T, N>& n)
 /********** KDTree Functions Implementation *********/
 template <typename T, std::size_t N>
 KDTree<T,N>::KDTree(KDPointArray &arr, const SplitFunction &splitFun)
-  :splitFun(splitFun)
+  : splitFun(splitFun)
 {
   assert(arr.size() >= 2);
 
+  std::array<T,N> bMin, bMax;
+  std::fill(bMin.begin(), bMin.end(), std::numeric_limits<T>::max());
+  std::fill(bMax.begin(), bMax.end(), std::numeric_limits<T>::min());
+
   KDPointArray internalArr;
   for(auto const& n : arr)
+  {
+    for(std::size_t dim = 0; dim < N; ++dim)
+    {
+      bMin[dim] = std::min(n->point[dim], bMin[dim]);
+      bMax[dim] = std::max(n->point[dim], bMax[dim]);
+    }
     internalArr.push_back(n);
+  }
 
-  root = KDTree::makeTree(internalArr.begin(), internalArr.end());
+  BoundingBox b(bMin, bMax);
+
+  root = KDTree::makeTree(internalArr.begin(), internalArr.end(), b);
 }
 
 template <typename T, std::size_t N>
 typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin, 
       const ArrayIter &end,
+      const BoundingBox<T,N> box,
       const std::size_t depth)
 {
   assert(depth >= 0);
@@ -60,16 +80,18 @@ typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin,
   const ArrayIter middle = splitFun(begin, end, depth);
 
   KDNodeUPtr left;
+  BoundingBox lBox = box; lBox.max[depth % N] = (*middle)->point[depth % N];
   if(std::distance(begin, middle) > 0)
-    left = makeTree(begin, middle, depth + 1);
+    left = makeTree(begin, middle, lBox, depth + 1);
   else left = nullptr;
 
   KDNodeUPtr right;
+  BoundingBox rBox = box; rBox.min[depth % N] = (*middle)->point[depth % N];
   if(std::distance(middle + 1, end) > 0)
-    right = makeTree(middle + 1, end, depth + 1);
+    right = makeTree(middle + 1, end, rBox, depth + 1);
   else right = nullptr;
 
-  return std::make_unique<const KDNode<T,N>>(*middle, left, right);
+  return std::make_unique<const KDNode<T,N>>(*middle, left, right, box);
 }
 
 template <typename T, std::size_t N>
@@ -89,6 +111,9 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
     const std::size_t depth) const
 {
   if(node == nullptr || node->isLeaf())
+    return;
+
+  if(!node->bb.hyperSphereIntersection(point, minDist))
     return;
 
   assert(node->value != nullptr);

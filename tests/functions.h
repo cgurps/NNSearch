@@ -21,7 +21,7 @@ void test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt199
 {
   typedef KDPoint<T,N> Point;
 
-  std::uniform_real_distribution<T> dist(0.0, 100.0);
+  std::uniform_real_distribution<T> dist(-100.0, 100.0);
 
   std::vector<std::shared_ptr<const Point>> arr;
   for(std::size_t i = 0; i < nbPoints; ++i)
@@ -60,7 +60,7 @@ void testOBJ(const std::string &filename, const std::size_t &nbTestPoints, std::
 {
   typedef KDPoint<double,3> Point;
 
-  std::uniform_real_distribution<double> dist(0.0, 100.0);
+  std::uniform_real_distribution<double> dist(-100.0, 100.0);
 
   objl::Loader loader;
   if(!loader.LoadFile(filename)) 
