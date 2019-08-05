@@ -15,3 +15,9 @@ TARGET_LINK_LIBRARIES(test_queries_ND
     ${Boost_LIBRARIES}
     )
 ADD_TEST(queries_ND test_queries_ND)
+
+ADD_EXECUTABLE(test_OBJ test_OBJ.cpp)
+TARGET_LINK_LIBRARIES(test_OBJ
+    ${Boost_LIBRARIES}
+    )
+ADD_TEST(OBJ test_OBJ)
