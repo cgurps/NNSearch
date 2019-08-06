@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
       - doxygen
+      - libgs-dev
 before_install:
   - pip install -U pip jinja2 Pygments
 script:
