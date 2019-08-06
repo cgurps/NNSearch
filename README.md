@@ -21,7 +21,7 @@ cmake ..
 make -j [YOUR_NUMBER_OF_CORES]
 ```
 
-You can query the program options using `-h`.
+You can query the program options using `-h`. The program is shipped with unit tests (through `ctest` if enabled) and a documentation (that you can generate using `make doc` and [Doxygen](http://www.doxygen.nl/)).
 
 ## Algorithm
 The k-d tree structure implemented here is a balanced binary tree. Each node of the tree contains two smart pointers toward its children and a point lying on the splitting plane used for constructing the tree. The splitting dimension depends on the depth of the tree: we start with dimension zero at depth zero, and then dimension one at depth one and so on. I also store a bounding box of the subtree for each node of the k-d tree.
