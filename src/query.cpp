@@ -1,3 +1,11 @@
+/**
+ * @file KDTree.h
+ * @author Thomas Caissard (\c thomas.caissard@gmail.com)
+ * @date 2019/08/05
+ *
+ * The main function for the single point query executable
+ */
+
 #include "KDTree.h"
 #include "SplitFunctions.h"
 #include "OBJ_Loader.h"
@@ -10,6 +18,11 @@ typedef double Scalar;
 typedef Eigen::Matrix<Scalar, 3, 1> Point;
 typedef KDTree<Scalar, 3>  Tree;
 
+/**
+* The main function takes as input a 3D point and a filename for the OBJ.
+* It performs then the query of the 3D point against the loaded OBJ and ouputs
+* the result in the standart output.
+*/
 int main(int argc, char** argv)
 {
   std::random_device dev;
