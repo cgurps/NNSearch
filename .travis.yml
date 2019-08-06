@@ -14,12 +14,11 @@ addons:
     packages:
       - doxygen
       - python3.8
-      - python3-pip
       - python-pygments
+      - python-jinja2
 
 script:
-  - sudo pip3 install --upgrade pip
-  - sudo pip3 install Jinja2
+  - ls /usr/lib/python3/dist-packages
   - git clone https://github.com/mosra/m.css.git
   - python3.8 m.css/documentation/doxygen.py Doxyfile-mcss
   #- doxygen Doxyfile.in
