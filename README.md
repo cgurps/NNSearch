@@ -1,4 +1,4 @@
-# Nearest Neighbors Algorithm
+# Nearest Neighbors Algorithm [![Documentation](https://codedocs.xyz/cgurps/NNSearch.svg)](https://codedocs.xyz/cgurps/NNSearch/)
 This piece of code implements a nearest neighbords search algorithm using a k-d tree.
 The algorithm works in arbitrary dimension, but suffers from the curse of dimensionality.
 
