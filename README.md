@@ -21,7 +21,9 @@ cmake ..
 make -j [YOUR_NUMBER_OF_CORES]
 ```
 
-You can query the program options using `-h`. The program is shipped with unit tests (through `ctest` if enabled) and a documentation (that you can generate using `make doc` and [Doxygen](http://www.doxygen.nl/)).
+The project contains two executable. You can access the options using `-h`. The first one, `query` performs one query (given by the input) on the loaded mesh (also given in the input) and outputs the results on the console. The second executable, `randomQueries`, performs a number of random queries against the loaded mesh (from the input). This has mainly been used for timings. Both programs only supports [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) as inputs (I used the library [OBJ_Loader](https://github.com/Bly7/OBJ-Loader)).
+
+The project is shipped with unit tests (through `ctest` if enabled) and a documentation (that you can generate using `make doc` and [Doxygen](http://www.doxygen.nl/)).
 
 ## Algorithm
 The k-d tree structure implemented here is a balanced binary tree. Each node of the tree contains two smart pointers toward its children and a point lying on the splitting plane used for constructing the tree. The splitting dimension depends on the depth of the tree: we start with dimension zero at depth zero, and then dimension one at depth one and so on. I also store a bounding box of the subtree for each node of the k-d tree.
