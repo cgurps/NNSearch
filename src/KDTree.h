@@ -1,10 +1,13 @@
 #pragma once
 
 /**
- * @dir src
  * @file KDTree.h
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
+ */
+
+/**
+ * @dir src
  * @brief The k-d tree header (with the implementation)
  */
 
