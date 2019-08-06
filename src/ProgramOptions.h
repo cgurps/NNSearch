@@ -12,6 +12,8 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/errors.hpp>
 
+#include <Eigen/Dense>
+
 /**
  * @struct ProgramOptions
  * @brief The interface for the program option
@@ -27,6 +29,11 @@ struct ProgramOptions
    * Number of test points for the main scope of the application
    */
   std::size_t nbTestPoints;
+
+  /**
+   * Point for the query executable
+   */
+  Eigen::Matrix<double,3,1> point;
 };
 
 /**

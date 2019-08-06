@@ -1,9 +1,0 @@
-/**
-  \mainpage Closest Point Query
-  
-  @section introduction Introduction
-
-  The project aims at implementing a nearest neighbors algorithm.
-  The problem is the following: given a set of point \f$S\f$ in \f$R^d\f$ and an input point \f$p\f$
-  return the closest point from \f$p\f$ in \f$S\f$. I choose to use KD-trees to answer this problem.
-*/

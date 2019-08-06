@@ -15,12 +15,19 @@ IF(COMPILER_SUPPORTS_MARCH_NATIVE)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 ENDIF()
 
-ADD_EXECUTABLE(closestPoint
-    src/main.cpp
+ADD_EXECUTABLE(randomQueries
+    src/randomQueries.cpp
     src/ProgramOptions.cpp
 )
+TARGET_LINK_LIBRARIES(randomQueries
+    ${Boost_LIBRARIES}
+)
 
-TARGET_LINK_LIBRARIES(closestPoint
+ADD_EXECUTABLE(query
+    src/query.cpp
+    src/ProgramOptions.cpp
+)
+TARGET_LINK_LIBRARIES(query
     ${Boost_LIBRARIES}
 )
 
