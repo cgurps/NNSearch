@@ -14,7 +14,7 @@
 # paths will be considered relative to the root of the repository, not the
 # location of the DOXYFILE.
 
-DOXYFILE = doc/Doxyfile.in
+DOXYFILE =
 
 # Specify external repository to link documentation with.
 # This is similar to Doxygen's TAGFILES option, but will automatically link to
@@ -70,7 +70,7 @@ TAGLINKS = cgurps/NNSearch
 # EXAMPLE_PATH =
 # EXAMPLE_PATTERNS =
 # EXAMPLE_RECURSIVE =
-# EXCLUDE =
+EXCLUDE = src/OBJ_Loader.h
 # EXCLUDE_PATTERNS =
 # EXCLUDE_SYMBOLS =
 # EXPAND_AS_DEFINED =
@@ -151,7 +151,7 @@ INPUT = src doc
 # PREDEFINED =
 # PROJECT_BRIEF =
 # PROJECT_LOGO =
-# PROJECT_NAME =
+PROJECT_NAME = NNSearch
 # PROJECT_NUMBER =
 # QT_AUTOBRIEF =
 # RECURSIVE =
