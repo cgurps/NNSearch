@@ -14,6 +14,14 @@
 
 #include "KDTree.h"
 
+/**
+ * Return the median from the input range at a given dimension. I use std::nth_element over std::sort
+ * to speed up the median computation (the average complexity goes from O(n log(n))
+ * to O(n)).
+ * @param begin the iterator to the beginning of the range
+ * @param end the iterator to the end of the range
+ * @param current depth of the tree
+ */
 template <typename T, std::size_t N>
 typename KDTree<T,N>::ArrayIter 
 median(const typename KDTree<T,N>::ArrayIter &begin, 
