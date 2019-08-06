@@ -11,9 +11,11 @@ addons:
   apt:
     packages:
       - doxygen
+      - python3-pip
 
 # Build your code e.g. by calling make
 script:
+  - pip3 install Jinja2 Pygments
   - doxygen Doxyfile.in
 
 # Generate and deploy documentation
