@@ -91,12 +91,24 @@ T distance(const std::array<T, N> &a, const std::array<T, N> &b);
 template <class T, std::size_t N>
 struct BoundingBox
 {
+  BoundingBox()
+  {}
+
   /**
    * Constructor of the bounding box
    * @param min the lower end of the bounding box
    * @param max the upper end of the bounding box
    */
   BoundingBox(const std::array<T,N> &min, const std::array<T,N> &max)
+    : min(std::move(min)), max(std::move(max))
+  {}
+
+  /**
+   * rvalue constructor of the bounding box
+   * @param min the lower end of the bounding box
+   * @param max the upper end of the bounding box
+   */
+  BoundingBox(const std::array<T,N> &&min, const std::array<T,N> &&max)
     : min(std::move(min)), max(std::move(max))
   {}
 

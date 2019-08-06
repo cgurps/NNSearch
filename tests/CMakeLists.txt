@@ -1,23 +1,17 @@
-ADD_EXECUTABLE(test_queries_2D test_queries_2D.cpp)
-TARGET_LINK_LIBRARIES(test_queries_2D
-    ${Boost_LIBRARIES}
-    )
-ADD_TEST(queries_2D test_queries_2D)
+SET(TEST_SOURCES
+  test_hypersphere_intersection.cpp
+  test_random_queries.cpp
+  test_OBJ.cpp)
 
-ADD_EXECUTABLE(test_queries_3D test_queries_3D.cpp)
-TARGET_LINK_LIBRARIES(test_queries_3D
+FOREACH(SOURCE_FILE ${TEST_SOURCES})
+  STRING(REPLACE ".cpp" "" SOURCE_NAME ${SOURCE_FILE})
+  ADD_EXECUTABLE(${SOURCE_NAME}
+    ${SOURCE_FILE})
+  TARGET_COMPILE_DEFINITIONS(${SOURCE_NAME} PRIVATE "BOOST_TEST_DYN_LINK=1")
+  TARGET_LINK_LIBRARIES(${SOURCE_NAME}
     ${Boost_LIBRARIES}
-    )
-ADD_TEST(queries_3D test_queries_3D)
-
-ADD_EXECUTABLE(test_queries_ND test_queries_ND.cpp)
-TARGET_LINK_LIBRARIES(test_queries_ND
-    ${Boost_LIBRARIES}
-    )
-ADD_TEST(queries_ND test_queries_ND)
-
-ADD_EXECUTABLE(test_OBJ test_OBJ.cpp)
-TARGET_LINK_LIBRARIES(test_OBJ
-    ${Boost_LIBRARIES}
-    )
-ADD_TEST(OBJ test_OBJ)
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  )
+  STRING(REPLACE "test_" "" TEST_NAME ${SOURCE_NAME})
+  ADD_TEST(${TEST_NAME} ${SOURCE_NAME})
+ENDFOREACH(SOURCE_FILE ${TEST_SOURCES})
