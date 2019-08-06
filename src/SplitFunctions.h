@@ -1,5 +1,11 @@
 #pragma once
 
+/**
+ * @file SplitFunctions.h
+ * @author Thomas Caissard (\c thomas.caissard@gmail.com)
+ * @date 2019/08/05
+ */
+
 #include "KDTree.h"
 
 template <typename T, std::size_t N>
