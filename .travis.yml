@@ -1,5 +1,4 @@
-# This will run on Travis' 'new' container-based infrastructure
-sudo: false 
+sudo: required
 
 # Blacklist
 branches:
@@ -17,10 +16,9 @@ addons:
       - python3.8
       - python3-pip
 
-# Build your code e.g. by calling make
 script:
-  - pip3 install --user --upgrade pip
-  - pip3 install --user Jinja2 Pygments
+  - sudo pip3 install --upgrade pip
+  - sudo pip3 install Jinja2 Pygments
   - git clone https://github.com/mosra/m.css.git
   - python3.8 m.css/documentation/doxygen.py Doxyfile-mcss
   #- doxygen Doxyfile.in
