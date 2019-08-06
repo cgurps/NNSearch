@@ -1,9 +1,11 @@
 #pragma once
 
 /**
+ * @dir src
  * @file SplitFunctions.h
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
+ * @brief Splitting functions for the k-d tree construction
  */
 
 #include "KDTree.h"
