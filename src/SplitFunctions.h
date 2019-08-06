@@ -13,7 +13,7 @@ median(const typename KDTree<T,N>::ArrayIter &begin,
       [&depth](const typename KDTree<T,N>::KDPointSPtr &a
              , const typename KDTree<T,N>::KDPointSPtr &b) -> bool
     {
-      return a->point[depth % N] < b->point[depth % N];
+      return a->operator()(depth % N) < b->operator()(depth % N);
     });
 
   return std::next(begin, size / 2);

@@ -6,7 +6,7 @@
 template <typename T, std::size_t N>
 bool test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt19937 &rng)
 {
-  typedef KDPoint<T,N> Point;
+  typedef Eigen::Matrix<T,N,1> Point;
 
   std::uniform_real_distribution<T> dist(-100.0, 100.0);
 
@@ -15,16 +15,16 @@ bool test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt199
   {
     Point p;
     for(std::size_t dim = 0; dim < N; ++dim)
-      p.point[dim] = dist(rng);;
+      p(dim) = dist(rng);;
     arr.push_back(std::make_shared<const Point>(p));
    }
 
   KDTree<T,N> tree(arr, median<T,N>);
   for(std::size_t i = 0; i < nbTestPoints; ++i)
   {
-    std::array<T,N> p;
+    Point p;
     for(std::size_t dim = 0; dim < N; ++dim)
-      p[dim] = dist(rng); 
+      p(dim) = dist(rng); 
 
     Point n = tree.nearest(p);
 
@@ -32,14 +32,14 @@ bool test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt199
     double minDist = std::numeric_limits<T>::max();
     for(std::size_t i = 0; i < nbPoints; ++i)
     {
-      if(distance(p, arr[i]->point) < minDist)
+      if((p - *(arr[i])).norm() < minDist)
       {
-        minDist = distance(p, arr[i]->point);
+        minDist = (p - *(arr[i])).norm();
         nn = *(arr[i]);
       }
     }
 
-    if(distance(nn.point, n.point) > T(1e-10)) return false;
+    if((nn - n).norm() > T(1e-10)) return false;
   }
 
   return true;

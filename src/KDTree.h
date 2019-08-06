@@ -17,70 +17,7 @@
 #include <functional>
 #include "assert.h"
 
-/**
- * @struct KDPoint
- * @brief Euclidean point of dimension N.
- * @tparam T the type of point (must be a real floating point type)
- * @tparam N the dimension of the point (must be greater than zero)
- */
-template <class T, std::size_t N>
-struct KDPoint
-{
-  static_assert(N > 0, "The dimension of a KDPoint must be greater than 0.");
-  static_assert(!std::numeric_limits<T>::is_integer, "T must be a real floating point type");
-
-  /**
-   * Default constructor for the KDPoint
-   */
-  KDPoint<T,N>() 
-  {}
-
-  /**
-   * r-value constructor for the KDPoint
-   *
-   * @param t the r-value reference
-   */
-  KDPoint<T,N>(std::array<T,N> &&t)
-    : point(std::move(t))
-  {}
-
-  /**
-   * reference constructor for the KDPoint
-   *
-   * @param t the reference
-   */
-  KDPoint<T,N>(std::array<T,N> &t)
-    : point(std::move(t))
-  {}
-
-  /**
-   * assignement operator
-   */
-  KDPoint<T,N>& operator=(KDPoint p)
-  {
-    std::swap(point, p.point);
-    return *this;
-  }
-
-  /**
-   * Default destructor
-   */
-  ~KDPoint<T,N>() = default;
-
-  /**
-   * The internal storage of the point coordinates
-   */
-  std::array<T, N> point;
-};
-
-/**
- * L2 distance between two euclidean points
- * @param a the first point
- * @param b the second point
- * @return the distance between a and b
- */
-template<class T, std::size_t N>
-T distance(const std::array<T, N> &a, const std::array<T, N> &b);
+#include <Eigen/Dense>
 
 /**
  * @struct BoundingBox
@@ -91,6 +28,11 @@ T distance(const std::array<T, N> &a, const std::array<T, N> &b);
 template <class T, std::size_t N>
 struct BoundingBox
 {
+  /**
+   * Alias for the internal point structure
+   */
+  typedef typename Eigen::Matrix<T,N,1> Point;
+
   BoundingBox()
   {}
 
@@ -99,7 +41,7 @@ struct BoundingBox
    * @param min the lower end of the bounding box
    * @param max the upper end of the bounding box
    */
-  BoundingBox(const std::array<T,N> &min, const std::array<T,N> &max)
+  BoundingBox(const Point &min, const Point &max)
     : min(std::move(min)), max(std::move(max))
   {}
 
@@ -108,7 +50,7 @@ struct BoundingBox
    * @param min the lower end of the bounding box
    * @param max the upper end of the bounding box
    */
-  BoundingBox(const std::array<T,N> &&min, const std::array<T,N> &&max)
+  BoundingBox(const Point &&min, const Point &&max)
     : min(std::move(min)), max(std::move(max))
   {}
 
@@ -120,17 +62,17 @@ struct BoundingBox
    *  @param p the center of the hypersphere
    *  @param radius the radius of the hypersphere
    */
-  bool hyperSphereIntersection(const std::array<T,N> &p, const T &radius) const;
+  bool hyperSphereIntersection(const Point &p, const T &radius) const;
 
   /**
    * The lower end of the bounding box
    */
-  std::array<T,N> min;
+  Point min;
 
   /**
    * The upper end of the bounding box
    */
-  std::array<T,N> max;
+  Point max;
 };
 
 /**
@@ -148,14 +90,19 @@ template <class T, std::size_t N>
 struct KDNode
 {
   /**
+   * Alias for the internal point structure
+   */
+  typedef typename Eigen::Matrix<T,N,1> Point;
+
+  /**
    *  Unique pointer alias of KDNode
    */
-  using KDNodeUPtr = std::unique_ptr<const KDNode<T,N>>;
+  typedef std::unique_ptr<const KDNode<T,N>> KDNodeUPtr;
 
   /**
    *  Shared pointer alias of KDPoint
    */
-  using KDPointSPtr = std::shared_ptr<const KDPoint<T,N>>;
+  typedef std::shared_ptr<const Point> KDPointSPtr;
 
   /**
    * Internal node constructor
@@ -225,31 +172,36 @@ class KDTree
 {
   public:
     /**
+     * Alias for the internal point structure
+     */
+    typedef Eigen::Matrix<T,N,1> Point;
+
+    /**
      * Alias for the KDNode unique pointer
      */
-    using KDNodeUPtr = std::unique_ptr<const KDNode<T,N>>;
+    typedef std::unique_ptr<const KDNode<T,N>> KDNodeUPtr;
 
     /**
      * Alias for the KDPoint shared pointer
      */
-    using KDPointSPtr = std::shared_ptr<const KDPoint<T,N>>;
+    typedef std::shared_ptr<const Point> KDPointSPtr;
 
     /**
      * Alias for the input KDPoint shared pointer vector
      */
-    using KDPointArray = typename std::vector<KDPointSPtr>;
+    typedef typename std::vector<KDPointSPtr> KDPointArray;
 
     /**
      * Alias for the KDPointArray iterator
      */
-    using ArrayIter = typename KDPointArray::iterator;
+    typedef typename KDPointArray::iterator ArrayIter;
 
     /**
      * Alias for the split function used for the construction of the tree
      */
-    using SplitFunction = std::function<ArrayIter(const ArrayIter&, 
+    typedef std::function<ArrayIter(const ArrayIter&, 
         const ArrayIter&, 
-        const std::size_t)>;
+        const std::size_t)> SplitFunction;
 
     /**
      * Deletion of the default constructor
@@ -282,7 +234,7 @@ class KDTree
      * Interface for the nearest point query
      * @param point the input point
      */
-    const KDPoint<T, N> nearest(const std::array<T, N> &point) const;
+    Point nearest(const Point &point) const;
 
     /**
      * Estimates the current memory usage of the tree
@@ -320,8 +272,8 @@ class KDTree
      * @param depth the current depth of the recursion
      */
     void nearest(const KDNodeUPtr &node,
-        const std::array<T, N> &point,
-        KDPoint<T, N> &closest,
+        const Point &point,
+        Point &closest,
         T &minDist,
         const std::size_t depth = 0) const;
 
@@ -341,38 +293,23 @@ class KDTree
     std::size_t treeDepth = 0;
 };
 
-/********** KDPoint Functions Implementation *********/
-template<class T, std::size_t N>
-T distance(const std::array<T, N> &a, const std::array<T, N> &b)
-{
-  T d(0.0);
-  for(std::size_t dim = 0; dim < N; ++dim)
-    d += (a[dim] - b[dim]) * (a[dim] - b[dim]);
-
-  assert(d >= T(0));
-
-  return std::sqrt(d);
-}
-
 /********** BoundingBox Functions Implementation **********/
 template <typename T, std::size_t N>
-bool BoundingBox<T,N>::hyperSphereIntersection(const std::array<T,N> &p, const T &radius) const
+bool BoundingBox<T,N>::hyperSphereIntersection(const Point &p, const T &radius) const
 {
-  T cornerDistance(0);
+  Point rCenter = T(0.5) * (min + max);
+  Point cDist = (p - rCenter).cwiseAbs();
+  Point rLen = max - min;
+
   for(std::size_t dim = 0; dim < N; ++dim)
   {
-    T rDimCenter = T(0.5) * (min[dim] + max[dim]);
-    T cDimDist = std::abs(p[dim] - rDimCenter);
-    T rLen = max[dim] - min[dim];
-    if(cDimDist > T(0.5) * rLen + radius)
+    if(cDist(dim) > T(0.5) * rLen(dim) + radius)
       return false;
-    if(cDimDist <= rLen)
+    if(cDist(dim) <= rLen(dim))
       return true;
-
-    cornerDistance += std::pow(cDimDist - T(0.5) * rLen, 2);
   }
   
-  return cornerDistance <= radius * radius;
+  return (cDist - T(0.5) * rLen).squaredNorm() <= radius * radius;
 }
 
 /********** KDTree Functions Implementation *********/
@@ -382,24 +319,22 @@ KDTree<T,N>::KDTree(KDPointArray &arr, const SplitFunction &splitFun)
 {
   assert(arr.size() >= 2);
 
-  std::array<T,N> bMin, bMax;
-  std::fill(bMin.begin(), bMin.end(), std::numeric_limits<T>::max());
-  std::fill(bMax.begin(), bMax.end(), std::numeric_limits<T>::min());
+  Point bMin = Point::Constant(N, std::numeric_limits<T>::max()), 
+        bMax = Point::Constant(N, std::numeric_limits<T>::min());
 
   KDPointArray internalArr;
   for(auto const& n : arr)
   {
-    for(std::size_t dim = 0; dim < N; ++dim)
-    {
-      bMin[dim] = std::min(n->point[dim], bMin[dim]);
-      bMax[dim] = std::max(n->point[dim], bMax[dim]);
-    }
+    bMin = bMin.cwiseMin(*n);
+    bMax = bMax.cwiseMax(*n);
     internalArr.push_back(n);
   }
 
+  BoundingBox<T,N> b(bMin, bMax);
+
   root = KDTree::makeTree(internalArr.begin(), 
       internalArr.end(), 
-      BoundingBox(bMin, bMax));
+      b);
 }
 
 template <typename T, std::size_t N>
@@ -415,13 +350,13 @@ typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin,
   const ArrayIter middle = splitFun(begin, end, depth);
 
   KDNodeUPtr left;
-  BoundingBox lBox = box; lBox.max[depth % N] = (*middle)->point[depth % N];
+  BoundingBox lBox = box; lBox.max(depth % N) = (*middle)->operator()(depth % N);
   if(std::distance(begin, middle) > 0)
     left = makeTree(begin, middle, lBox, depth + 1);
   else left = nullptr;
 
   KDNodeUPtr right;
-  BoundingBox rBox = box; rBox.min[depth % N] = (*middle)->point[depth % N];
+  BoundingBox rBox = box; rBox.min(depth % N) = (*middle)->operator()(depth % N);
   if(std::distance(middle + 1, end) > 0)
     right = makeTree(middle + 1, end, rBox, depth + 1);
   else right = nullptr;
@@ -430,9 +365,9 @@ typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin,
 }
 
 template <typename T, std::size_t N>
-const KDPoint<T,N> KDTree<T,N>::nearest(const std::array<T, N> &point) const
+typename KDTree<T,N>::Point KDTree<T,N>::nearest(const Point &point) const
 {
-  KDPoint<T, N> closest({0.0, 0.0});
+  Point closest;
   T minDist = std::numeric_limits<T>::max();
   nearest(root, point, closest, minDist);
   return closest;
@@ -440,8 +375,8 @@ const KDPoint<T,N> KDTree<T,N>::nearest(const std::array<T, N> &point) const
 
 template <typename T, std::size_t N>
 void KDTree<T,N>::nearest(const KDNodeUPtr &node,
-    const std::array<T, N> &point,
-    KDPoint<T, N> &closest,
+    const Point &point,
+    Point &closest,
     T &minDist,
     const std::size_t depth) const
 {
@@ -453,7 +388,7 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
 
   assert(node->value != nullptr);
 
-  const T dist = distance(point, node->value->point); 
+  const T dist = (point - *(node->value)).norm();
   if(dist < minDist)
   {
     minDist = dist;
@@ -461,7 +396,7 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
   }
 
   const size_t dim = depth % N;
-  if(point[dim] <= node->value->point[dim])
+  if(point(dim) <= node->value->operator()(dim))
   {
     nearest(node->left , point, closest, minDist, depth + 1);
     nearest(node->right, point, closest, minDist, depth + 1);

@@ -30,7 +30,7 @@ bool test()
   if(N < 2) return true;
 
   BoundingBox<T,N> b;
-  std::array<T,N> p;
+  Eigen::Matrix<T,N,1> p;
 
   for(std::size_t dim = 0; dim < N; ++dim)
   {
@@ -67,5 +67,5 @@ bool f(Indices<Is...>)
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(BoundingBox2D, T, testTypes)
 {
-  BOOST_REQUIRE(f<T>(MakeIndices<100>::type()));
+  BOOST_REQUIRE(f<T>(MakeIndices<30>::type()));
 }

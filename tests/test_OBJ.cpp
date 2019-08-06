@@ -5,7 +5,7 @@
 
 bool testOBJ(const std::string &filename, const std::size_t &nbTestPoints, std::mt19937 &rng)
 {
-  typedef KDPoint<double,3> Point;
+  typedef Eigen::Matrix<double,3,1> Point;
 
   std::uniform_real_distribution<double> dist(-100.0, 100.0);
 
@@ -25,9 +25,9 @@ bool testOBJ(const std::string &filename, const std::size_t &nbTestPoints, std::
   KDTree<double,3> tree(arr, median<double,3>);
   for(std::size_t i = 0; i < nbTestPoints; ++i)
   {
-    std::array<double,3> p;
+    Point p;
     for(std::size_t dim = 0; dim < 3; ++dim)
-      p[dim] = dist(rng); 
+      p(dim) = dist(rng); 
 
     Point n = tree.nearest(p);
 
@@ -35,14 +35,14 @@ bool testOBJ(const std::string &filename, const std::size_t &nbTestPoints, std::
     double minDist = std::numeric_limits<double>::max();
     for(std::size_t i = 0; i < arr.size(); ++i)
     {
-      if(distance(p, arr[i]->point) < minDist)
+      if((p - *(arr[i])).norm() < minDist)
       {
-        minDist = distance(p, arr[i]->point);
+        minDist = (p - *(arr[i])).norm();
         nn = *(arr[i]);
       }
     }
 
-    if(distance(nn.point, n.point) > 1e-10) return false;
+    if((n - nn).norm() > 1e-10) return false;
   }
 
   return true;

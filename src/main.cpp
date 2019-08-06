@@ -7,7 +7,7 @@
 #include <chrono>
 
 typedef double Scalar;
-typedef KDPoint<Scalar, 3> Point;
+typedef Eigen::Matrix<Scalar, 3, 1> Point;
 typedef KDTree<Scalar, 3>  Tree;
 
 int main(int argc, char** argv)
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     Tree tree(points, median<Scalar,3>);
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<Scalar> tTime = finish - start;
-    std::cout << "Tree construction time: " << tTime.count() << " s\n";
+    std::cout << "Tree construction time: " << tTime.count() * 1000.0 << "ms\n";
     std::cout << "Size of the tree: " << static_cast<double>(tree.memoryUsage()) / (1024.0 * 1024.0) << "mb" << std::endl;
     std::cout << "Size of the points: " << static_cast<double>(points.size() * sizeof(Point)) / (1024.0 * 1024.0) << "mb" << std::endl;
 
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     tTime = std::chrono::duration<Scalar>(0);
     for(std::size_t i = 0; i < options.nbTestPoints; ++i)
     {
-      std::array<Scalar, 3> p = {dist(rng), dist(rng), dist(rng)}; 
+      Point p = {dist(rng), dist(rng), dist(rng)}; 
 
       auto start = std::chrono::high_resolution_clock::now();
       tree.nearest(p);
