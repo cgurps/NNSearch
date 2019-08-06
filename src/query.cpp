@@ -1,5 +1,5 @@
 /**
- * @file KDTree.h
+ * @file query.cpp
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
  *
