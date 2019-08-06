@@ -20,8 +20,8 @@ script:
   - PATH=$PATH:doxygen-1.8.15/bin
   - export PATH
   - git clone https://github.com/mosra/m.css.git
-  #- python m.css/documentation/doxygen.py Doxyfile-mcss
-  - doxygen Doxyfile.in
+  - python m.css/documentation/doxygen.py Doxyfile-mcss
+  #- doxygen Doxyfile.in
 deploy:
   provider: pages
   skip_cleanup: true
