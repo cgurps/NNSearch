@@ -15,7 +15,9 @@ addons:
 
 # Build your code e.g. by calling make
 script:
+  - pip3 install --upgrade pip
   - pip3 install Jinja2 Pygments
+  - git clone https://github.com/mosra/m.css.git
   - doxygen Doxyfile.in
 
 # Generate and deploy documentation
