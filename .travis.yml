@@ -9,6 +9,9 @@ branches:
 # Install dependencies
 addons:
   apt:
+    update: true
+    sources:
+      - sourceline: 'ppa:deadsnakes/ppa'
     packages:
       - doxygen
       - python3.6
