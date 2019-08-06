@@ -4,11 +4,12 @@
  * @file KDTree.h
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
+ * @brief The k-d tree header (with the implementation)
  */
 
 /**
  * @dir src
- * @brief The k-d tree header (with the implementation)
+ * @brief The source directory
  */
 
 #include <utility>
