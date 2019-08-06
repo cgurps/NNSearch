@@ -16,9 +16,7 @@ before_install:
   - pip install -U pip jinja2 Pygments
 script:
   - git clone https://github.com/mosra/m.css.git
-  - python --version
   - python m.css/documentation/doxygen.py Doxyfile-mcss
-  #- doxygen Doxyfile.in
 deploy:
   provider: pages
   skip_cleanup: true
