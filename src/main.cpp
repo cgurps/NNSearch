@@ -27,7 +27,6 @@ int main(int argc, char** argv)
     std::cout << "Loading successful" << std::endl;
     objl::Mesh mesh = loader.LoadedMeshes[0];
 
-
     std::cout << "Building KD-Tree with " << mesh.Vertices.size() << " points..." << std::endl;
     std::vector<std::shared_ptr<const Point>> points;
     for(std::size_t i = 0; i < mesh.Vertices.size(); ++i)
@@ -41,6 +40,8 @@ int main(int argc, char** argv)
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<Scalar> tTime = finish - start;
     std::cout << "Tree construction time: " << tTime.count() << " s\n";
+    std::cout << "Size of the tree: " << static_cast<double>(tree.memoryUsage()) / (1024.0 * 1024.0) << "mb" << std::endl;
+    std::cout << "Size of the points: " << static_cast<double>(points.size() * sizeof(Point)) / (1024.0 * 1024.0) << "mb" << std::endl;
 
     std::cout << "Performing " << options.nbTestPoints << " random queries..." << std::endl;
 
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
       std::array<Scalar, 3> p = {dist(rng), dist(rng), dist(rng)}; 
 
       auto start = std::chrono::high_resolution_clock::now();
-      Point n = tree.nearest(p);
+      tree.nearest(p);
       auto finish = std::chrono::high_resolution_clock::now();
       tTime += finish - start;
 

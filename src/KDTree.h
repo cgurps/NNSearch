@@ -165,7 +165,7 @@ struct KDNode
    * @param b the node bounding box
    */
   KDNode(KDPointSPtr p, KDNodeUPtr &lhs, KDNodeUPtr &rhs, BoundingBox<T,N> b) 
-    : value(p), left(std::move(lhs)), right(std::move(rhs)), bb(b) 
+    : left(std::move(lhs)), right(std::move(rhs)), value(p), bb(b) 
   {}
 
   /**
@@ -284,6 +284,14 @@ class KDTree
      */
     const KDPoint<T, N> nearest(const std::array<T, N> &point) const;
 
+    /**
+     * Estimates the current memory usage of the tree
+     */
+    std::size_t memoryUsage()
+    {
+      return sizeof(KDNode<T,N>) * (std::pow(2, treeDepth + 1) - 1);
+    }
+
   private: 
     /**
      * Recursive function for the KDTree construction.
@@ -326,6 +334,11 @@ class KDTree
      * The split function for the construction
      */
     const SplitFunction splitFun;
+
+    /**
+     * The depth of the tree
+     */
+    std::size_t treeDepth = 0;
 };
 
 /********** KDPoint Functions Implementation *********/
@@ -396,6 +409,8 @@ typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin,
       const std::size_t depth)
 {
   assert(depth >= 0);
+
+  treeDepth = std::max(depth, treeDepth);
 
   const ArrayIter middle = splitFun(begin, end, depth);
 

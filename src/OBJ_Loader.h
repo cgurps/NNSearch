@@ -650,7 +650,7 @@ namespace objl
 
 					if (temp.size() != 1)
 					{
-						for (int i = 0; i < temp.size() - 1; i++)
+						for (unsigned i = 0; i < temp.size() - 1; i++)
 						{
 							pathtomat += temp[i] + "/";
 						}
@@ -687,13 +687,13 @@ namespace objl
 			file.close();
 
 			// Set Materials for each Mesh
-			for (int i = 0; i < MeshMatNames.size(); i++)
+			for (unsigned i = 0; i < MeshMatNames.size(); i++)
 			{
 				std::string matname = MeshMatNames[i];
 
 				// Find corresponding material name in loaded materials
 				// when found copy material variables into mesh material
-				for (int j = 0; j < LoadedMaterials.size(); j++)
+				for (unsigned j = 0; j < LoadedMaterials.size(); j++)
 				{
 					if (LoadedMaterials[j].name == matname)
 					{
@@ -879,7 +879,7 @@ namespace objl
 
 					// pNext = the next vertex in the list
 					Vertex pNext;
-					if (i == tVerts.size() - 1)
+					if (static_cast<unsigned>(i) == tVerts.size() - 1)
 					{
 						pNext = tVerts[0];
 					}
