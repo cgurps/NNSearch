@@ -38,7 +38,7 @@ The k-d tree implementation is header only and is contained in `KDtree.h`. The f
 The actual representation of an Euclidean uses the type `Eigen::Matrix<T,N,1>` (a matrix of type `T` with `N` columns and one row) of [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page). This allows the use of various functions of the library (for example efficient distance computation between points).
 
 The current bottleneck of the implementation is the computation of the distance between the query point Q and the bounding box of a node during the recursion.
-The function `hyperSphereIntersection` from the `BoundingBox` is a generalization of the method proposed by e.James from [@](https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection). The idea is to first reduce the computation to one corner of the bounding box, and then checks for the following three cases:
+The function `hyperSphereIntersection` from the `BoundingBox` is a generalization of the method proposed by e.James from [StackOverflow](https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection). The idea is to first reduce the computation to one corner of the bounding box, and then checks for the following three cases:
 1. the circle is far enough from the bounding box (easy)
 2. the circle is close enough from the bounding box (easy)
 3. the circle intersects the corner of the bounding box (difficult)
