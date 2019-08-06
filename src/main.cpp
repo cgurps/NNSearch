@@ -6,11 +6,15 @@
 #include <random>
 #include <chrono>
 
+typedef double Scalar;
+typedef KDPoint<Scalar, 3> Point;
+typedef KDTree<Scalar, 3>  Tree;
+
 int main(int argc, char** argv)
 {
   std::random_device dev;
   std::mt19937 rng(dev());
-  std::uniform_real_distribution<double> dist(-100.0, 100.0);
+  std::uniform_real_distribution<Scalar> dist(-100.0, 100.0);
 
   ProgramOptions options = parseOptions(argc, argv);
 
@@ -23,7 +27,6 @@ int main(int argc, char** argv)
     std::cout << "Loading successful" << std::endl;
     objl::Mesh mesh = loader.LoadedMeshes[0];
 
-    typedef KDPoint<double, 3> Point;
 
     std::cout << "Building KD-Tree with " << mesh.Vertices.size() << " points..." << std::endl;
     std::vector<std::shared_ptr<const Point>> points;
@@ -34,17 +37,17 @@ int main(int argc, char** argv)
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    KDTree<double, 3> tree(points, median<double,3>);
+    Tree tree(points, median<Scalar,3>);
     auto finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> tTime = finish - start;
+    std::chrono::duration<Scalar> tTime = finish - start;
     std::cout << "Tree construction time: " << tTime.count() << " s\n";
 
     std::cout << "Performing " << options.nbTestPoints << " random queries..." << std::endl;
 
-    tTime = std::chrono::duration<double>(0);
+    tTime = std::chrono::duration<Scalar>(0);
     for(std::size_t i = 0; i < options.nbTestPoints; ++i)
     {
-      std::array<double, 3> p = {dist(rng), dist(rng), dist(rng)}; 
+      std::array<Scalar, 3> p = {dist(rng), dist(rng), dist(rng)}; 
 
       auto start = std::chrono::high_resolution_clock::now();
       Point n = tree.nearest(p);

@@ -15,6 +15,7 @@
 #include <cmath>
 #include <type_traits>
 #include <functional>
+#include "assert.h"
 
 /**
  * @struct KDPoint
@@ -48,10 +49,18 @@ struct KDPoint
    *
    * @param t the reference
    */
-
   KDPoint<T,N>(std::array<T,N> &t)
     : point(std::move(t))
   {}
+
+  /**
+   * assignement operator
+   */
+  KDPoint<T,N>& operator=(KDPoint p)
+  {
+    std::swap(point, p.point);
+    return *this;
+  }
 
   /**
    * Default destructor
@@ -72,9 +81,6 @@ struct KDPoint
  */
 template<class T, std::size_t N>
 T distance(const std::array<T, N> &a, const std::array<T, N> &b);
-
-template <typename T, std::size_t N>
-std::ostream &operator<<(std::ostream &out, const KDPoint<T, N>& p);
 
 /**
  * @struct BoundingBox
@@ -102,24 +108,7 @@ struct BoundingBox
    *  @param p the center of the hypersphere
    *  @param radius the radius of the hypersphere
    */
-  bool hyperSphereIntersection(const std::array<T,N> &p, const T &radius) const
-  {
-    T cornerDistance(0);
-    for(std::size_t dim = 0; dim < N; ++dim)
-    {
-      T rDimCenter = T(0.5) * (min[dim] + max[dim]);
-      T cDimDist = std::abs(p[dim] - rDimCenter);
-      T rLen = max[dim] - min[dim];
-      if(cDimDist > T(0.5) * rLen + radius)
-        return false;
-      if(cDimDist <= rLen)
-        return true;
-
-      cornerDistance += std::pow(cDimDist - T(0.5) * rLen, 2);
-    }
-
-    return cornerDistance <= radius * radius;
-  }
+  bool hyperSphereIntersection(const std::array<T,N> &p, const T &radius) const;
 
   /**
    * The lower end of the bounding box
@@ -168,14 +157,6 @@ struct KDNode
   {}
 
   /**
-   * Leaf constructor
-   * @param p the leaf value
-   */
-  KDNode(KDPointSPtr p) 
-    : value(p)
-  {}
-
-  /**
    * Deletion of default constructor
    */
   KDNode() = delete;
@@ -221,9 +202,6 @@ struct KDNode
   const BoundingBox<T,N> bb;
 };
 
-template <typename T, std::size_t N>
-std::ostream &operator<<(std::ostream &out, const KDNode<T, N>& n);
-
 /** @class KDTree
  *  @brief Container for the KD-tree
  *
@@ -257,7 +235,9 @@ class KDTree
     /**
      * Alias for the split function used for the construction of the tree
      */
-    using SplitFunction = std::function<ArrayIter(const ArrayIter&, const ArrayIter&, const std::size_t)>;
+    using SplitFunction = std::function<ArrayIter(const ArrayIter&, 
+        const ArrayIter&, 
+        const std::size_t)>;
 
     /**
      * Deletion of the default constructor
@@ -336,4 +316,132 @@ class KDTree
     const SplitFunction splitFun;
 };
 
-#include "KDTree.ih"
+/********** KDPoint Functions Implementation *********/
+template<class T, std::size_t N>
+T distance(const std::array<T, N> &a, const std::array<T, N> &b)
+{
+  T d(0.0);
+  for(std::size_t dim = 0; dim < N; ++dim)
+    d += (a[dim] - b[dim]) * (a[dim] - b[dim]);
+
+  assert(d >= T(0));
+
+  return std::sqrt(d);
+}
+
+/********** BoundingBox Functions Implementation **********/
+template <typename T, std::size_t N>
+bool BoundingBox<T,N>::hyperSphereIntersection(const std::array<T,N> &p, const T &radius) const
+{
+  T cornerDistance(0);
+  for(std::size_t dim = 0; dim < N; ++dim)
+  {
+    T rDimCenter = T(0.5) * (min[dim] + max[dim]);
+    T cDimDist = std::abs(p[dim] - rDimCenter);
+    T rLen = max[dim] - min[dim];
+    if(cDimDist > T(0.5) * rLen + radius)
+      return false;
+    if(cDimDist <= rLen)
+      return true;
+
+    cornerDistance += std::pow(cDimDist - T(0.5) * rLen, 2);
+  }
+  
+  return cornerDistance <= radius * radius;
+}
+
+/********** KDTree Functions Implementation *********/
+template <typename T, std::size_t N>
+KDTree<T,N>::KDTree(KDPointArray &arr, const SplitFunction &splitFun)
+  : splitFun(splitFun)
+{
+  assert(arr.size() >= 2);
+
+  std::array<T,N> bMin, bMax;
+  std::fill(bMin.begin(), bMin.end(), std::numeric_limits<T>::max());
+  std::fill(bMax.begin(), bMax.end(), std::numeric_limits<T>::min());
+
+  KDPointArray internalArr;
+  for(auto const& n : arr)
+  {
+    for(std::size_t dim = 0; dim < N; ++dim)
+    {
+      bMin[dim] = std::min(n->point[dim], bMin[dim]);
+      bMax[dim] = std::max(n->point[dim], bMax[dim]);
+    }
+    internalArr.push_back(n);
+  }
+
+  root = KDTree::makeTree(internalArr.begin(), 
+      internalArr.end(), 
+      BoundingBox(bMin, bMax));
+}
+
+template <typename T, std::size_t N>
+typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin, 
+      const ArrayIter &end,
+      const BoundingBox<T,N> box,
+      const std::size_t depth)
+{
+  assert(depth >= 0);
+
+  const ArrayIter middle = splitFun(begin, end, depth);
+
+  KDNodeUPtr left;
+  BoundingBox lBox = box; lBox.max[depth % N] = (*middle)->point[depth % N];
+  if(std::distance(begin, middle) > 0)
+    left = makeTree(begin, middle, lBox, depth + 1);
+  else left = nullptr;
+
+  KDNodeUPtr right;
+  BoundingBox rBox = box; rBox.min[depth % N] = (*middle)->point[depth % N];
+  if(std::distance(middle + 1, end) > 0)
+    right = makeTree(middle + 1, end, rBox, depth + 1);
+  else right = nullptr;
+
+  return std::make_unique<const KDNode<T,N>>(*middle, left, right, box);
+}
+
+template <typename T, std::size_t N>
+const KDPoint<T,N> KDTree<T,N>::nearest(const std::array<T, N> &point) const
+{
+  KDPoint<T, N> closest({0.0, 0.0});
+  T minDist = std::numeric_limits<T>::max();
+  nearest(root, point, closest, minDist);
+  return closest;
+}
+
+template <typename T, std::size_t N>
+void KDTree<T,N>::nearest(const KDNodeUPtr &node,
+    const std::array<T, N> &point,
+    KDPoint<T, N> &closest,
+    T &minDist,
+    const std::size_t depth) const
+{
+  if(node == nullptr || node->isLeaf())
+    return;
+
+  if(!node->bb.hyperSphereIntersection(point, minDist))
+    return;
+
+  assert(node->value != nullptr);
+
+  const T dist = distance(point, node->value->point); 
+  if(dist < minDist)
+  {
+    minDist = dist;
+    closest = *(node->value);
+  }
+
+  const size_t dim = depth % N;
+  if(point[dim] <= node->value->point[dim])
+  {
+    nearest(node->left , point, closest, minDist, depth + 1);
+    nearest(node->right, point, closest, minDist, depth + 1);
+  }
+  else
+  {
+    nearest(node->right, point, closest, minDist, depth + 1);
+    nearest(node->left , point, closest, minDist, depth + 1);
+  }
+}
