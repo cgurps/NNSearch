@@ -1,9 +1,9 @@
 /**
+ * @dir src
  * @file query.cpp
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
- *
- * The main function for the single point query executable
+ * @brief The main function for the single point query executable
  */
 
 #include "KDTree.h"
