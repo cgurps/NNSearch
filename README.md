@@ -1,5 +1,6 @@
 # Nearest Neighbors Algorithm
 This piece of code implements a nearest neighbords search algorithm using a k-d tree.
+The algorithm works in arbitrary dimension, but suffers from the curse of dimensionality.
 
 ## Getting Started
 You will first need to clone the repository
