@@ -4,11 +4,12 @@
  * @file ProgramOptions.h
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
+ * @brief Program options for the executables
  */
 
 /**
  * @dir src
- * @brief The k-d tree header (with the implementation)
+ * @brief The source directory
  */
 
 #include <boost/program_options/options_description.hpp>
