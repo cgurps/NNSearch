@@ -1,29 +1,22 @@
-sudo: required
+language: python
+sudo: false
 
 # Blacklist
 branches:
   only:
     - master
-
-# Install dependencies
+python:
+  - "3.6"
 addons:
   apt:
-    update: true
-    sources:
-      - sourceline: 'ppa:deadsnakes/ppa'
     packages:
       - doxygen
-      - python3.8
-      - python-pygments
-      - python-jinja2
-
+before_install:
+  - pip install -U pip jinja2 Pygments
 script:
-  - ls /usr/lib/python3/dist-packages
   - git clone https://github.com/mosra/m.css.git
   - python3.8 m.css/documentation/doxygen.py Doxyfile-mcss
   #- doxygen Doxyfile.in
-
-# Generate and deploy documentation
 deploy:
   provider: pages
   skip_cleanup: true
