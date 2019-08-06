@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
       - doxygen
+      - python3.6
       - python3-pip
 
 # Build your code e.g. by calling make
