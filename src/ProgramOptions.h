@@ -1,9 +1,11 @@
 #pragma once
 
 /**
+ * @dir src
  * @file ProgramOptions.h
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
+ * @brief Options for the executable
  */
 
 #include <boost/program_options/options_description.hpp>
