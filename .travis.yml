@@ -11,11 +11,14 @@ python:
 addons:
   apt:
     packages:
-      - doxygen
       - libgs-dev
 before_install:
   - pip install -U pip jinja2 Pygments
 script:
+  - curl http://doxygen.nl/files/doxygen-1.8.15.linux.bin.tar.gz --output doxygen.tar.gz
+  - tar xfv doxygen.tar.gz
+  - PATH=$PATH:doxygen-1.8.15/bin
+  - export PATH
   - git clone https://github.com/mosra/m.css.git
   - python m.css/documentation/doxygen.py Doxyfile-mcss
 deploy:
