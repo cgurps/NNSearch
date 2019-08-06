@@ -1,4 +1,5 @@
-\mainpage Nearest Neighbors Algorithm
+Main Page {#mainpage}
+=========
 
 # Introduction
 This piece of code implements a nearest neighbords search algorithm using a k-d tree.
