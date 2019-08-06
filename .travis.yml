@@ -18,7 +18,8 @@ script:
   - pip3 install --user --upgrade pip
   - pip3 install --user Jinja2 Pygments
   - git clone https://github.com/mosra/m.css.git
-  - doxygen Doxyfile.in
+  - python3 m.css/documentation/doxygen.py Doxyfile-mcss
+  #- doxygen Doxyfile.in
 
 # Generate and deploy documentation
 deploy:
