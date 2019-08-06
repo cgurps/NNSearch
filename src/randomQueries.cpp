@@ -1,9 +1,12 @@
 /**
- * @dir src
  * @file randomQueries.cpp
  * @author Thomas Caissard (\c thomas.caissard@gmail.com)
  * @date 2019/08/05
- * @brief The main function for the random point queries
+ */
+
+/**
+ * @dir src
+ * @brief The k-d tree header (with the implementation)
  */
 
 #include "KDTree.h"
