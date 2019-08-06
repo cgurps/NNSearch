@@ -1,3 +1,11 @@
+/**
+ * @file KDTree.h
+ * @author Thomas Caissard (\c thomas.caissard@gmail.com)
+ * @date 2019/08/05
+ *
+ * The main function for the random point queries
+ */
+
 #include "KDTree.h"
 #include "SplitFunctions.h"
 #include "OBJ_Loader.h"
@@ -10,6 +18,12 @@ typedef double Scalar;
 typedef Eigen::Matrix<Scalar, 3, 1> Point;
 typedef KDTree<Scalar, 3>  Tree;
 
+/**
+* The main function takes as input a filename for the OBJ
+* and a number of test points n. It then performs n random queries
+* against the loaded OBJ. The function outputs the tree construction
+* time, the memory usage and the overall queries time.
+*/
 int main(int argc, char** argv)
 {
   std::random_device dev;
