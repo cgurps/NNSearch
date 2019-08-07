@@ -367,18 +367,20 @@ typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin,
       const BoundingBox<T,N> box,
       const std::size_t depth)
 {
-  assert(depth >= 0);
-
   treeDepth = std::max(depth, treeDepth);
 
+  // We call the splitting function to get an iterator
+  // to the point on the splitting plane
   const ArrayIter middle = splitFun(begin, end, depth);
 
+  // Left recursion
   KDNodeUPtr left;
   BoundingBox lBox = box; lBox.max(depth % N) = (*middle)->operator()(depth % N);
   if(std::distance(begin, middle) > 0)
     left = makeTree(begin, middle, lBox, depth + 1);
   else left = nullptr;
 
+  // Right recursion
   KDNodeUPtr right;
   BoundingBox rBox = box; rBox.min(depth % N) = (*middle)->operator()(depth % N);
   if(std::distance(middle + 1, end) > 0)
@@ -407,11 +409,13 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
   if(node == nullptr || node->isLeaf())
     return;
 
+  // Checks if the hypersphere of radius minDist centered on the query point
+  // intersects the bounding box. If so, the algorithm continue, otherwise
+  // it halts.
   if(!node->bb.hyperSphereIntersection(point, minDist))
     return;
 
-  assert(node->value != nullptr);
-
+  // Check if the current point is closer than the best found so far
   const T dist = (point - *(node->value)).norm();
   if(dist < minDist)
   {
@@ -419,6 +423,9 @@ void KDTree<T,N>::nearest(const KDNodeUPtr &node,
     closest = *(node->value);
   }
 
+  // The recursion chooses to explore the left of the tree first
+  // if the coordinate dim of the query point lies left of the
+  // splitting plane
   const size_t dim = depth % N;
   if(point(dim) <= node->value->operator()(dim))
   {

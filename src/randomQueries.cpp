@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     }
 
     std::cout << std::endl << "Total query time: " << tTime.count() << " s\n";
-    std::cout << "Mean query time: " << tTime.count() / options.nbTestPoints * 1000.0 << " ms\n";
+    std::cout << "Mean query time: " << tTime.count() / options.nbTestPoints * 1000.0 * 1000.0 << " µs\n";
   }
 
   return 0;
