@@ -5,7 +5,7 @@ The algorithm works in arbitrary dimension, but suffers from the curse of dimens
 ## Getting Started
 You will first need to clone the repository and then init the submodules
 ```
-git clone https://github.com/cgurps/2DFluidSimulation.git [PROJECT_FOLDER]
+git clone https://github.com/cgurps/NNSearch.git [PROJECT_FOLDER]
 cd [PROJECT_FOLDER]
 git submodule update --init
 ```
