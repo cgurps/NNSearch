@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <functional>
 #include "assert.h"
+#include <variant>
 
 #include <Eigen/Dense>
 
@@ -82,6 +83,19 @@ struct BoundingBox
 };
 
 /**
+ * @struct IsContainedIn
+ * @brief template struct that checks if a type T is contained in the list of allowed types TypeList
+ * @tparam T the type to check
+ * @tparam TypeList the list of allowed types
+ */
+template<class T, class TypeList>
+struct IsContainedIn;
+
+template <class T, template<class...> class Tmpl, class... Ts>
+struct IsContainedIn<T,Tmpl<Ts...>>
+  : std::disjunction<std::is_same<T,Ts>...> {};
+
+/**
  * @struct KDNode
  * @brief represents a KD-Tree node
  *
@@ -95,6 +109,10 @@ struct BoundingBox
 template <class T, std::size_t N>
 struct KDNode
 {
+  using AllowedTypes = std::variant<double, float>;
+  static_assert(IsContainedIn<T,AllowedTypes>::value, "The scalar type must be of double or float");
+  static_assert(N > 1, "The dimension N must be strictly greater than one");
+
   /**
    * Alias for the internal point structure
    */
