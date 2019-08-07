@@ -39,7 +39,8 @@ The nearest neighbors algorithm performs a simple recursive search of the tree. 
 2. the algorithm chooses to search the left or the right children by checking on which side of the splitting plane Q is. This ensures that we search first the best part of the tree for the nearest neighbors. This also helps reducing the size of the bounding box, which in turns feeds the first method for pruning the search space.
 
 ## Implementation
-The k-d tree implementation is header only and is contained in `KDtree.h`. The first structure `KDNode` represents one node of the tree and contains two smart pointers to its children and another smart pointer to the node value (ie the point lying on the splitting plane). It also contains its `BoundingBox` used for the nearest neighbor algorithm. The class `KDTree` implements a k-d tree of dimension N and contains a constructor taking a array containing the initial points, and the method for the nearest neighbors query (`nearest(Point)`).
+The k-d tree implementation is header only and is contained in `KDtree.h`. 
+The first structure `KDNode` represents one node of the tree and contains two smart pointers to its children and another smart pointer to the node value (ie the point lying on the splitting plane). It also contains its `BoundingBox` used for the nearest neighbor algorithm. The class `KDTree` implements a k-d tree of dimension N and contains a constructor taking a array containing the initial points, and the method for the nearest neighbors query (`nearest(Point)`).
 
 The actual representation of an Euclidean uses the type `Eigen::Matrix<T,N,1>` (a matrix of type `T` with `N` columns and one row) of [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page). This allows the use of various functions of the library (for example efficient distance computation between points).
 
