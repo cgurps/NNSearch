@@ -9,7 +9,8 @@ git clone https://github.com/cgurps/2DFluidSimulation.git [PROJECT_FOLDER]
 cd [PROJECT_FOLDER]
 git submodule update --init
 ```
-To compile the project, you will need [Boost](https://www.boost.org/) installed on your machine. To project uses CMake to generate the Makefile needed for the compilation. You can use these commands to build the executable
+To compile the project, you will need [Boost](https://www.boost.org/) installed on your machine. 
+The project uses CMake to generate the Makefile needed for the compilation. You can use these commands to build the executable
 
 ```
 mkdir build
@@ -18,7 +19,12 @@ cmake ..
 make -j [YOUR_NUMBER_OF_CORES]
 ```
 
-The project contains two executable. You can access the options using `-h`. The first one, `query` performs one query (given by the input) on the loaded mesh (also given in the input) and outputs the results on the console. The second executable, `randomQueries`, performs a number of random queries against the loaded mesh (from the input). This has mainly been used for timings. Both programs only supports [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) as inputs (I used the library [OBJ_Loader](https://github.com/Bly7/OBJ-Loader)).
+The project contains two executable. You can access their options using `-h`. 
+The first one, `query` performs one query (given by the input) on the loaded mesh (also given in the input) and outputs the results on the console. 
+The second executable, `randomQueries`, performs a number of random queries against the loaded mesh (from the input). 
+This has mainly been used for timings. Both programs only supports [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) 
+as inputs (I used the library [OBJ_Loader](https://github.com/Bly7/OBJ-Loader)). You can find some OBJ in the folder `shape`
+that you will need to decompress (for example using `gunzip shapes/*`).
 
 The project is shipped with unit tests (through `ctest` if enabled) and a [documentation](https://cgurps.github.io/NNSearch/index.html).
 
