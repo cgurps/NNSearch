@@ -50,7 +50,7 @@ matrix:
         - export CXX=g++-7
         - mkdir build 
         - cd build 
-        - cmake ..
+        - cmake -DCMAKE_BUILD_TYPE=Release ..
         - make -j 2
         - gunzip shapes/*
         - ctest
