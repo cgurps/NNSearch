@@ -1,4 +1,7 @@
 # Nearest Neighbors Algorithm
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a69f2a4ca5f54c4eb5adade68734c66c)](https://app.codacy.com/app/cgurps/NNSearch?utm_source=github.com&utm_medium=referral&utm_content=cgurps/NNSearch&utm_campaign=Badge_Grade_Settings)
+
 ![Travis (.org)](https://img.shields.io/travis/cgurps/NNSearch?style=flat-square)
 
 This piece of code implements a nearest neighbors search algorithm using a k-d tree.
