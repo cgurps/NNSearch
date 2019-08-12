@@ -14,14 +14,12 @@ git submodule update --init
 ```
 To compile the project, you will need [Boost](https://www.boost.org/) installed on your machine. 
 The project uses CMake to generate the Makefile needed for the compilation. You can use these commands to build the executable
-
 ```
 mkdir build
 cd build
 cmake ..
 make -j [YOUR_NUMBER_OF_CORES]
 ```
-
 The project contains two executables. You can access their options using `-h`. 
 The first one, `query` performs one query (given by the input) on the loaded mesh (also given in the input) and writes the result on the standard output.
 The second executable, `randomQueries`, performs a number of random queries against the loaded mesh (from the input). 
@@ -57,9 +55,9 @@ The function `hyperSphereIntersection` from the `BoundingBox` is a generalizatio
 I tested timing on Archlinux (linux kernel 5.2.4) using gcc 9.1.0 with optimizations. My CPU is and Intel Core i7-6700K.
 The test runs 10000 random queries against the loaded mesh.
 
-| Shape | Nb. of Points | Tree Construction Time | Tree Memory | Average Time |
-|:-|:-:|:-:|:-:|:-:|
-| Stanford Bunny | 14904 (0.341125mb) | 3.3495 ms| 1.24992mb |  9.92943 µs |
-| Stanford Dragon | 2613918 (59.8278mb) | 744.452 ms | 320mb | 680.913 µs |
-| Happy Buddha | 3262422 (74.6707mb) | 954.633 ms | 320mb | 549.162 µs |
-| Random Points | 15000000 (343.323mb) | 10707.3 ms | 1280mb | 8883.77 µs |
+| Shape           | Nb. of Points        | Tree Construction Time | Tree Memory  | Average Time |
+| :-------------  | :------------------: | :--------------------: | :----------: | :----------: |
+| Stanford Bunny  | 14904 (0.341125mb)   | 3.3495 ms              | 1.24992mb    |  9.92943 µs  |
+| Stanford Dragon | 2613918 (59.8278mb)  | 744.452 ms             | 320mb        | 680.913 µs   |
+| Happy Buddha    | 3262422 (74.6707mb)  | 954.633 ms             | 320mb        | 549.162 µs   |
+| Random Points   | 15000000 (343.323mb) | 10707.3 ms             | 1280mb       | 8883.77 µs   |
