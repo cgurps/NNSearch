@@ -1,4 +1,6 @@
 # Nearest Neighbors Algorithm
+![Travis (.org)](https://img.shields.io/travis/cgurps/NNSearch?style=flat-square)
+
 This piece of code implements a nearest neighbors search algorithm using a k-d tree.
 The algorithm works in arbitrary dimension, but suffers from the curse of dimensionality.
 
