@@ -44,11 +44,13 @@ matrix:
             - gcc-7
             - g++-7
             - boost1.70
+            - gzip
       script:
         - export CC=gcc-7
         - export CXX=g++-7
         - mkdir build 
         - cd build 
         - cmake ..
-        - make
+        - make -j 2
+        - gzip shapes/*
         - ctest
