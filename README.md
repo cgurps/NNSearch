@@ -7,14 +7,14 @@ The algorithm works in arbitrary dimension, but suffers from the curse of dimens
 
 ## Getting Started
 You will first need to clone the repository and then init the submodules
-```
+```sh
 git clone https://github.com/cgurps/NNSearch.git [PROJECT_FOLDER]
 cd [PROJECT_FOLDER]
 git submodule update --init
 ```
 To compile the project, you will need [Boost](https://www.boost.org/) installed on your machine. 
 The project uses CMake to generate the Makefile needed for the compilation. You can use these commands to build the executable
-```
+```sh
 mkdir build
 cd build
 cmake ..
