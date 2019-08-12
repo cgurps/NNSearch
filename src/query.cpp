@@ -15,9 +15,6 @@
 #include "OBJ_Loader.h"
 #include "ProgramOptions.h"
 
-#include <random>
-#include <chrono>
-
 typedef double Scalar;
 typedef Eigen::Matrix<Scalar, 3, 1> Point;
 typedef KDTree<Scalar, 3>  Tree;
@@ -29,10 +26,6 @@ typedef KDTree<Scalar, 3>  Tree;
 */
 int main(int argc, char** argv)
 {
-  std::random_device dev;
-  std::mt19937 rng(dev());
-  std::uniform_real_distribution<Scalar> dist(-100.0, 100.0);
-
   ProgramOptions options = parseOptions(argc, argv);
 
   objl::Loader loader;
