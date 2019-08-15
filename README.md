@@ -31,19 +31,24 @@ The project is shipped with unit tests (through `ctest` if enabled) and a [docum
 
 ## Algorithm
 The k-d tree structure implemented here is a balanced binary tree. 
-Each node of the tree contains two smart pointers toward its children and a point lying on the splitting plane used for constructing the tree. 
+The tree is represented as an array starting at index zero. Given a node i, its left child is at position 2 * i + 1 and its right child at position 2 * i + 2.
 The splitting dimension depends on the depth of the tree: we start with dimension zero at depth zero, and then dimension one at depth one and so on. 
-I also store a bounding box of the subtree for each node of the k-d tree.
+The array also contains a bounding box of the subtree for each node of the k-d tree.
 
 The nearest neighbors algorithm performs a simple recursive search of the tree. The search space is reduced using two methods:
-1. at each recursion, we check if the distance from the query point Q to the current node bounding box is less than the current best distance. If so, we stop the recursion as there is no point in the subtree that can beat the current best point
-2. the algorithm chooses to search the left or the right children by checking on which side of the splitting plane Q is. This ensures that we search first the best part of the tree for the nearest neighbors. This also helps reducing the size of the bounding box, which in turns feeds the first method for pruning the search space.
+1. at each recursion, we check if the distance from the query point Q to the current node bounding box is less than the current best distance. 
+If so, we stop the recursion as there is no point in the subtree that can beat the current best point
+2. the algorithm chooses to search the left or the right children by checking on which side of the splitting plane Q is. 
+This ensures that we search first the best part of the tree for the nearest neighbors. 
+This also helps reducing the size of the bounding box, which in turns feeds the first method for pruning the search space.
 
 ## Implementation
 The k-d tree implementation is header only and is contained in `KDtree.h`. 
-The first structure `KDNode` represents one node of the tree and contains two smart pointers to its children and another smart pointer to the node value (ie the point lying on the splitting plane). It also contains its `BoundingBox` used for the nearest neighbor algorithm. The class `KDTree` implements a k-d tree of dimension N and contains a constructor taking a array containing the initial points, and the method for the nearest neighbors query (`nearest(Point)`).
+The tree is represented as an array of `std::pair` where the first element of the pair is the point and the second element is the `BoundingBox`.
+The class `KDTree` implements a k-d tree of dimension N and contains a constructor taking a array containing the initial points, and the method for the nearest neighbors query (`nearest(Point)`).
 
-The actual representation of an Euclidean point uses the type `Eigen::Matrix<T,N,1>` (a matrix of type `T` with `N` columns and one row) of [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page). This allows the use of various functions of the library (for example efficient distance computation between points).
+The actual representation of an Euclidean point uses the type `Eigen::Matrix<T,N,1>` (a matrix of type `T` with `N` columns and one row) 
+of [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page). This allows the use of various functions of the library (for example efficient distance computation between points).
 
 The current bottleneck of the implementation is the computation of the distance between the query point Q and the bounding box of a node during the recursion.
 The function `hyperSphereIntersection` from the `BoundingBox` is a generalization of the method proposed by e.James from [StackOverflow](https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection). The idea is to first reduce the computation to one corner of the bounding box, and then checks for the following three cases:
