@@ -10,13 +10,13 @@ bool test(const std::size_t nbPoints, const std::size_t nbTestPoints, std::mt199
 
   std::uniform_real_distribution<T> dist(-100.0, 100.0);
 
-  std::vector<std::shared_ptr<const Point>> arr;
+  std::vector<Point*> arr;
   for(std::size_t i = 0; i < nbPoints; ++i)
   {
-    Point p;
+    Point *p = new Point(Point::Zero());
     for(std::size_t dim = 0; dim < N; ++dim)
-      p(dim) = dist(rng);;
-    arr.push_back(std::make_shared<const Point>(p));
+      p->operator()(dim) = dist(rng);
+    arr.push_back(p);
    }
 
   KDTree<T,N> tree(arr, median<T,N>);

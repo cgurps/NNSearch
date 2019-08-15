@@ -23,6 +23,7 @@
 #include <functional>
 #include "assert.h"
 #include <variant>
+#include <queue>
 
 #include <Eigen/Dense>
 
@@ -41,6 +42,7 @@ struct BoundingBox
   typedef typename Eigen::Matrix<T,N,1> Point;
 
   BoundingBox()
+    : min(Point::Zero()), max(Point::Zero())
   {}
 
   /**
@@ -95,96 +97,6 @@ template <class T, template<class...> class Tmpl, class... Ts>
 struct IsContainedIn<T,Tmpl<Ts...>>
   : std::disjunction<std::is_same<T,Ts>...> {};
 
-/**
- * @struct KDNode
- * @brief represents a KD-Tree node
- *
- * A KDNode contains a shared pointer to a KDPoint representing
- * its splitting point and two unique pointer to its left and right
- * child. A KDNode becomes a leaf when both children are empty.
- *
- * @tparam T the type of point (must be a real floating point type)
- * @tparam N the dimension of the point (must be greater than zero)
- */
-template <class T, std::size_t N>
-struct KDNode
-{
-  using AllowedTypes = std::variant<double, float>;
-  static_assert(IsContainedIn<T,AllowedTypes>::value, "The scalar type must be of double or float");
-  static_assert(N > 1, "The dimension N must be strictly greater than one");
-
-  /**
-   * Alias for the internal point structure
-   */
-  typedef typename Eigen::Matrix<T,N,1> Point;
-
-  /**
-   *  Unique pointer alias of KDNode
-   */
-  typedef std::unique_ptr<const KDNode<T,N>> KDNodeUPtr;
-
-  /**
-   *  Shared pointer alias of KDPoint
-   */
-  typedef std::shared_ptr<const Point> KDPointSPtr;
-
-  /**
-   * Internal node constructor
-   * @param p the splitting point of the node
-   * @param lhs the left child of the node
-   * @param rhs the right child of the node
-   * @param b the node bounding box
-   */
-  KDNode(KDPointSPtr p, KDNodeUPtr &lhs, KDNodeUPtr &rhs, BoundingBox<T,N> b) 
-    : left(std::move(lhs)), right(std::move(rhs)), value(p), bb(b) 
-  {}
-
-  /**
-   * Deletion of default constructor
-   */
-  KDNode() = delete;
-
-  /**
-   * Deletion of copy constructor
-   */
-  KDNode(const KDNode &) = delete;
-
-  /**
-   * Deletion of assignement operator
-   */
-  KDNode &operator= (const KDNode &) = delete;
-
-  /**
-   * Default destructor
-   */
-  ~KDNode() = default;
-
-  /**
-   * checks if the node is a leaf
-   */
-  bool isLeaf() const { return value == nullptr; }
-
-  /**
-   * Left child
-   */
-  const KDNodeUPtr left;
-
-  /**
-   * Right child
-   */
-  const KDNodeUPtr right;
-
-  /**
-   * The node point 
-   */
-  const KDPointSPtr value;
-
-  /**
-   * Node bounding box
-   */
-  const BoundingBox<T,N> bb;
-};
-
 /** @class KDTree
  *  @brief Container for the KD-tree
  *
@@ -201,19 +113,9 @@ class KDTree
     typedef Eigen::Matrix<T,N,1> Point;
 
     /**
-     * Alias for the KDNode unique pointer
-     */
-    typedef std::unique_ptr<const KDNode<T,N>> KDNodeUPtr;
-
-    /**
-     * Alias for the KDPoint shared pointer
-     */
-    typedef std::shared_ptr<const Point> KDPointSPtr;
-
-    /**
      * Alias for the input KDPoint shared pointer vector
      */
-    typedef typename std::vector<KDPointSPtr> KDPointArray;
+    typedef typename std::vector<Point*> KDPointArray;
 
     /**
      * Alias for the KDPointArray iterator
@@ -265,7 +167,7 @@ class KDTree
      */
     std::size_t memoryUsage()
     {
-      return sizeof(KDNode<T,N>) * (std::pow(2, treeDepth + 1) - 1);
+      return 3 * N * sizeof(T) * tree.size();
     }
 
   private: 
@@ -278,9 +180,10 @@ class KDTree
      * @param box the parent bounding box
      * @param depth the current depth
      */
-    KDNodeUPtr makeTree(const ArrayIter &begin, 
+    void makeTree(const ArrayIter &begin, 
         const ArrayIter &end,
         const BoundingBox<T,N> box,
+        const std::size_t treePos = 0,
         const std::size_t depth = 0); 
 
     /**
@@ -295,16 +198,16 @@ class KDTree
      * @param minDist the current minimum distance found
      * @param depth the current depth of the recursion
      */
-    void nearest(const KDNodeUPtr &node,
+    void nearest(const std::size_t node,
         const Point &point,
         Point &closest,
         T &minDist,
         const std::size_t depth = 0) const;
 
     /**
-     * The root of the tree
+     * Array representing the tree
      */
-    KDNodeUPtr root;
+    std::vector<std::pair<Point, BoundingBox<T,N>>> tree;
 
     /**
      * The split function for the construction
@@ -324,16 +227,17 @@ bool BoundingBox<T,N>::hyperSphereIntersection(const Point &p, const T &radius) 
   Point rCenter = T(0.5) * (min + max);
   Point cDist = (p - rCenter).cwiseAbs();
   Point rLen = max - min;
+  T r = std::sqrt(radius);
 
   for(std::size_t dim = 0; dim < N; ++dim)
   {
-    if(cDist(dim) > T(0.5) * rLen(dim) + radius)
+    if(cDist(dim) > T(0.5) * rLen(dim) + r)
       return false;
     if(cDist(dim) <= rLen(dim))
       return true;
   }
   
-  return (cDist - T(0.5) * rLen).squaredNorm() <= radius * radius;
+  return (cDist - T(0.5) * rLen).squaredNorm() <= radius;
 }
 
 /********** KDTree Functions Implementation *********/
@@ -346,95 +250,96 @@ KDTree<T,N>::KDTree(KDPointArray &arr, const SplitFunction &splitFun)
   Point bMin = Point::Constant(N, std::numeric_limits<T>::max()), 
         bMax = Point::Constant(N, std::numeric_limits<T>::min());
 
-  KDPointArray internalArr;
   for(auto const& n : arr)
   {
     bMin = bMin.cwiseMin(*n);
     bMax = bMax.cwiseMax(*n);
-    internalArr.push_back(n);
   }
 
   BoundingBox<T,N> b(bMin, bMax);
 
-  root = KDTree::makeTree(internalArr.begin(), 
-      internalArr.end(), 
-      b);
+  std::size_t treeSize 
+    = static_cast<std::size_t>(std::pow(2, 
+          static_cast<std::size_t>(std::log(arr.size()) / std::log(2.0)) + 1));
+
+  tree.resize(treeSize, std::make_pair(Point::Zero(), BoundingBox<T,N>()));
+
+  KDTree::makeTree(arr.begin(), arr.end(), b);
 }
 
 template <typename T, std::size_t N>
-typename KDTree<T,N>::KDNodeUPtr KDTree<T,N>::makeTree(const ArrayIter &begin, 
+void KDTree<T,N>::makeTree(const ArrayIter &begin, 
       const ArrayIter &end,
       const BoundingBox<T,N> box,
+      const std::size_t treePos,
       const std::size_t depth)
 {
+  if(treePos > tree.size() - 1) return;
+
   treeDepth = std::max(depth, treeDepth);
 
   // We call the splitting function to get an iterator
   // to the point on the splitting plane
   const ArrayIter middle = splitFun(begin, end, depth);
 
+  tree[treePos]  = std::make_pair(**middle, box);
+
   // Left recursion
-  KDNodeUPtr left;
   BoundingBox lBox = box; lBox.max(depth % N) = (*middle)->operator()(depth % N);
   if(std::distance(begin, middle) > 0)
-    left = makeTree(begin, middle, lBox, depth + 1);
-  else left = nullptr;
+    makeTree(begin, middle, lBox, 2 * treePos + 1, depth + 1);
 
   // Right recursion
-  KDNodeUPtr right;
   BoundingBox rBox = box; rBox.min(depth % N) = (*middle)->operator()(depth % N);
   if(std::distance(middle + 1, end) > 0)
-    right = makeTree(middle + 1, end, rBox, depth + 1);
-  else right = nullptr;
-
-  return std::make_unique<const KDNode<T,N>>(*middle, left, right, box);
+    makeTree(middle + 1, end, rBox, 2 * treePos + 2, depth + 1);
 }
 
 template <typename T, std::size_t N>
 typename KDTree<T,N>::Point KDTree<T,N>::nearest(const Point &point) const
 {
-  Point closest;
+  Point closest = tree[0].first;
   T minDist = std::numeric_limits<T>::max();
-  nearest(root, point, closest, minDist);
+  nearest(0, point, closest, minDist);
   return closest;
 }
 
 template <typename T, std::size_t N>
-void KDTree<T,N>::nearest(const KDNodeUPtr &node,
+void KDTree<T,N>::nearest(const std::size_t node,
     const Point &point,
     Point &closest,
     T &minDist,
     const std::size_t depth) const
 {
-  if(node == nullptr || node->isLeaf())
-    return;
+  if(node > tree.size() - 1) return;
+  if(tree[node].first == Point::Zero()) return;
 
   // Checks if the hypersphere of radius minDist centered on the query point
   // intersects the bounding box. If so, the algorithm continue, otherwise
   // it halts.
-  if(!node->bb.hyperSphereIntersection(point, minDist))
+  if(!tree[node].second.hyperSphereIntersection(point, minDist))
     return;
 
   // Check if the current point is closer than the best found so far
-  const T dist = (point - *(node->value)).norm();
+  const T dist = (point - tree[node].first).squaredNorm();
   if(dist < minDist)
   {
     minDist = dist;
-    closest = *(node->value);
+    closest = tree[node].first;
   }
 
   // The recursion chooses to explore the left of the tree first
   // if the coordinate dim of the query point lies left of the
   // splitting plane
   const size_t dim = depth % N;
-  if(point(dim) <= node->value->operator()(dim))
+  if(point(dim) <= tree[node].first.operator()(dim))
   {
-    nearest(node->left , point, closest, minDist, depth + 1);
-    nearest(node->right, point, closest, minDist, depth + 1);
+    nearest(2 * node + 1, point, closest, minDist, depth + 1);
+    nearest(2 * node + 2, point, closest, minDist, depth + 1);
   }
   else
   {
-    nearest(node->right, point, closest, minDist, depth + 1);
-    nearest(node->left , point, closest, minDist, depth + 1);
+    nearest(2 * node + 2, point, closest, minDist, depth + 1);
+    nearest(2 * node + 1, point, closest, minDist, depth + 1);
   }
 }

@@ -46,11 +46,11 @@ int main(int argc, char** argv)
     objl::Mesh mesh = loader.LoadedMeshes[0];
 
     std::cout << "Building KD-Tree with " << mesh.Vertices.size() << " points..." << std::endl;
-    std::vector<std::shared_ptr<const Point>> points;
+    std::vector<Point*> points;
     for(std::size_t i = 0; i < mesh.Vertices.size(); ++i)
     {
-      Point p({mesh.Vertices[i].Position.X, mesh.Vertices[i].Position.Y, mesh.Vertices[i].Position.Z});
-      points.push_back(std::make_shared<const Point>(p));
+      Point *p = new Point({mesh.Vertices[i].Position.X, mesh.Vertices[i].Position.Y, mesh.Vertices[i].Position.Z});
+      points.push_back(p);
     }
 
     auto start = std::chrono::high_resolution_clock::now();

@@ -15,11 +15,11 @@ bool testOBJ(const std::string &filename, const std::size_t &nbTestPoints, std::
 
   objl::Mesh mesh = loader.LoadedMeshes[0];
 
-  std::vector<std::shared_ptr<const Point>> arr;
+  std::vector<Point*> arr;
   for(std::size_t i = 0; i < mesh.Vertices.size(); ++i)
   {
-    Point p({mesh.Vertices[i].Position.X, mesh.Vertices[i].Position.Y, mesh.Vertices[i].Position.Z});
-    arr.push_back(std::make_shared<const Point>(p));
+    Point *p = new Point({mesh.Vertices[i].Position.X, mesh.Vertices[i].Position.Y, mesh.Vertices[i].Position.Z});
+    arr.push_back(p);
   }
 
   KDTree<double,3> tree(arr, median<double,3>);

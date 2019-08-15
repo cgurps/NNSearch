@@ -30,8 +30,8 @@ median(const typename KDTree<T,N>::ArrayIter &begin,
 {
   const auto size = std::distance(begin, end);
   std::nth_element(begin, begin + size / 2, end, 
-      [&depth](const typename KDTree<T,N>::KDPointSPtr &a
-             , const typename KDTree<T,N>::KDPointSPtr &b) -> bool
+      [&depth](const typename KDTree<T,N>::Point* a
+             , const typename KDTree<T,N>::Point* b) -> bool
     {
       return a->operator()(depth % N) < b->operator()(depth % N);
     });
