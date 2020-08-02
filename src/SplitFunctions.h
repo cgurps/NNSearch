@@ -23,13 +23,13 @@
  * @param current depth of the tree
  */
 template <typename T, std::size_t N>
-typename KDTree<T,N>::ArrayIter 
-median(const typename KDTree<T,N>::ArrayIter &begin, 
-    const typename KDTree<T,N>::ArrayIter &end, 
+typename KDTree<T,N>::ArrayIter
+median(const typename KDTree<T,N>::ArrayIter &begin,
+    const typename KDTree<T,N>::ArrayIter &end,
     const std::size_t depth)
 {
   const auto size = std::distance(begin, end);
-  std::nth_element(begin, begin + size / 2, end, 
+  std::nth_element(begin, begin + size / 2, end,
       [&depth](const typename KDTree<T,N>::Point* a
              , const typename KDTree<T,N>::Point* b) -> bool
     {

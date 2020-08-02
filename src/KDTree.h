@@ -22,7 +22,6 @@
 #include <type_traits>
 #include <functional>
 #include "assert.h"
-#include <variant>
 #include <queue>
 
 #include <Eigen/Dense>
@@ -84,19 +83,6 @@ struct BoundingBox
   Point max;
 };
 
-/**
- * @struct IsContainedIn
- * @brief template struct that checks if a type T is contained in the list of allowed types TypeList
- * @tparam T the type to check
- * @tparam TypeList the list of allowed types
- */
-template<class T, class TypeList>
-struct IsContainedIn;
-
-template <class T, template<class...> class Tmpl, class... Ts>
-struct IsContainedIn<T,Tmpl<Ts...>>
-  : std::disjunction<std::is_same<T,Ts>...> {};
-
 /** @class KDTree
  *  @brief Container for the KD-tree
  *
@@ -125,9 +111,7 @@ class KDTree
     /**
      * Alias for the split function used for the construction of the tree
      */
-    typedef std::function<ArrayIter(const ArrayIter&, 
-        const ArrayIter&, 
-        const std::size_t)> SplitFunction;
+    using SplitFunction = ArrayIter(*)(const ArrayIter&, const ArrayIter&, const std::size_t);
 
     /**
      * Deletion of the default constructor
@@ -170,7 +154,7 @@ class KDTree
       return 3 * N * sizeof(T) * tree.size();
     }
 
-  private: 
+  private:
     /**
      * Recursive function for the KDTree construction.
      * The tree is built by splitting the input range using the Split Function provided by
@@ -180,11 +164,11 @@ class KDTree
      * @param box the parent bounding box
      * @param depth the current depth
      */
-    void makeTree(const ArrayIter &begin, 
+    void makeTree(const ArrayIter &begin,
         const ArrayIter &end,
         const BoundingBox<T,N> box,
         const std::size_t treePos = 0,
-        const std::size_t depth = 0); 
+        const std::size_t depth = 0);
 
     /**
      * Recursive function to find the nearest point in the KDTree.
@@ -236,7 +220,7 @@ bool BoundingBox<T,N>::hyperSphereIntersection(const Point &p, const T &radius) 
     if(cDist(dim) <= rLen(dim))
       return true;
   }
-  
+
   return (cDist - T(0.5) * rLen).squaredNorm() <= radius;
 }
 
@@ -268,12 +252,14 @@ KDTree<T,N>::KDTree(KDPointArray &arr, const SplitFunction &splitFun)
 }
 
 template <typename T, std::size_t N>
-void KDTree<T,N>::makeTree(const ArrayIter &begin, 
+void KDTree<T,N>::makeTree(const ArrayIter &begin,
       const ArrayIter &end,
       const BoundingBox<T,N> box,
       const std::size_t treePos,
       const std::size_t depth)
 {
+  using BoundingBox = BoundingBox<T, N>;
+
   if(treePos > tree.size() - 1) return;
 
   treeDepth = std::max(depth, treeDepth);
